@@ -1,8 +1,18 @@
 package com.banking.app.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "accounts")
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Account {
 
     private Long id;
