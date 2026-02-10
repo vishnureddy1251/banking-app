@@ -1,8 +1,10 @@
 package com.banking.app.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import org.springframework.boot.autoconfigure.web.WebProperties;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,12 +17,29 @@ import java.time.LocalDateTime;
 @Builder
 public class Account {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "account_holder_name", nullable = false)
+    @NotBlank(message = "Account holder name is required")
     private String accountName;
+
+    @Column(name = "account_number", unique = true, nullable = false)
     private String accountNumber;
+
+    @Column(name = "account_type", nullable = false)
+    @NotBlank(message = "Account type is required (Savings or Checking)")
     private String accountType;
+
+    @Column(name = "balance", nullable = false)
+    @DecimalMin(value = "0.0", message = "Balance cannot be negative")
     private BigDecimal balance;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     protected void onCreate(){
