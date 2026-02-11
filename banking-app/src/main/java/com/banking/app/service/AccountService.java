@@ -79,8 +79,16 @@ public class AccountService {
     }
 
     @Transactional
-    public void deleteAccount(Long id){
+    public String transfer(Long fromAccountId, Long toAccountId, BigDecimal amount) {
+        withdraw(fromAccountId, amount);
+        deposit(toAccountId, amount);
 
+        log.info("Transferred {} from account ID {} to account ID {}", amount, fromAccountId, toAccountId);
+        return "Successfully transferred " + amount + " from account " + fromAccountId + " to account " + toAccountId;
+    }
+
+    @Transactional
+    public void deleteAccount(Long id){
         Account account = getAccountById(id);
         accountRepository.delete(account);
         log.info("Account deleted: {}", account.getAccountNumber());
