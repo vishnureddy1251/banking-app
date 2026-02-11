@@ -56,4 +56,16 @@ public class AccountController {
         Account updated = accountService.withdraw(id, amount);
         return ResponseEntity.ok(updated);
     }
+
+    @PostMapping("/transfer")
+    public ResponseEntity<Map<String, String>> transfer(
+            @RequestBody Map<String, Object> request) {
+
+        Long fromId = Long.valueOf(request.get("fromAccountId").toString());
+        Long toId = Long.valueOf(request.get("toAccountId").toString());
+        BigDecimal amount = new BigDecimal(request.get("amount").toString());
+
+        String result = accountService.transfer(fromId, toId, amount);
+        return ResponseEntity.ok(Map.of("message", result));
+    }
 }
