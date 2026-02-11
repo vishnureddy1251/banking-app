@@ -56,4 +56,34 @@ public class AccountService {
         log.info("Deposited {} to account {}. New Balance: {}", amount, account.getAccountNumber(), newBalance);
         return updated;
     }
+
+    @Transactional
+    public Account withdraw(Long accountId, BigDecimal amount){
+        if (amount.compareTo(BigDecimal.ZERO) <=0){
+            throw new IllegalArgumentException("Withdrawal amount must be positive");
+        }
+
+        Account account = getAccountById(accountId);
+
+        if (account.getBalance().compareTo(amount) < 0) {
+            throw new InsufficientBalanceException(
+                    "Insufficient balance! Available: " + account.getBalance() + ", Requested: " + amount);
+        }
+
+        BigDecimal newBalance = account.getBalance().subtract(amount);
+        account.setBalance(newBalance);
+
+        Account updated = accountRepository.save(account);
+        log.info("Withdrawn {} from account {}. New balance: {}", amount, account.getAccountNumber(), newBalance);
+        return updated;
+    }
+
+    @Transactional
+    public void deleteAccount(Long id){
+
+        Account account = getAccountById(id);
+        accountRepository.delete(account);
+        log.info("Account deleted: {}", account.getAccountNumber());
+
+    }
 }
