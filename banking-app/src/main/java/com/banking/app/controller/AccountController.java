@@ -68,4 +68,10 @@ public class AccountController {
         String result = accountService.transfer(fromId, toId, amount);
         return ResponseEntity.ok(Map.of("message", result));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> deleteAccount(@PathVariable Long id) {
+        accountService.deleteAccount(id);
+        return ResponseEntity.ok(Map.of("message", "Account deleted successfully"));
+    }
 }
