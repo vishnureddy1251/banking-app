@@ -1,5 +1,6 @@
 package com.banking.app.service;
 
+import com.banking.app.exception.InsufficientBalanceException;
 import com.banking.app.model.Account;
 import com.banking.app.repository.AccountRepository;
 import jakarta.transaction.Transactional;
