@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import javax.security.auth.login.AccountNotFoundException;
+import com.banking.app.exception.AccountNotFoundException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
@@ -22,7 +22,7 @@ public class AccountService {
 
     @Transactional
     public Account createAccount(Account account){
-        String accountNumber = "ACC" + UUID.randomUUID().toString().substring(0,0).toUpperCase();
+        String accountNumber = "ACC" + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
         account.setAccountNumber(accountNumber);
 
         if (account.getBalance() == null){
@@ -30,7 +30,7 @@ public class AccountService {
         }
 
         Account savedAccount = accountRepository.save(account);
-        log.info("Account created: {} for {}", savedAccount.getAccountNumber(), savedAccount.getAccountHolderName());
+        log.info("Account created: {} for {}", savedAccount.getAccountNumber(), savedAccount.getAccountName());
         return savedAccount;
     }
 
