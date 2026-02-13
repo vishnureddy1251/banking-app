@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -41,10 +40,20 @@ public class Customer {
 
     @Column(name = "city")
     private String city;
+
+    @Column(name = "state")
     private String state;
+
+    @Column(name = "zipcode")
     private String zipCode;
+
+    @Column(name = "dateOfBirth")
     private LocalDate dateOfBirth;
+
+    @Column(name = "createdAt")
     private LocalDateTime createdAt;
+
+    @Column(name = "updatedAt")
     private LocalDateTime updatedAt;
 
     @PrePersist
