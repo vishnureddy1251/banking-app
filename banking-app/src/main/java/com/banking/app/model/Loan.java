@@ -1,9 +1,8 @@
 package com.banking.app.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -17,10 +16,22 @@ import java.time.LocalDateTime;
 @Builder
 public class Loan {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "account_id", nullable = false)
     private Long accountId;
+
+    @Column(name = "loan_type", nullable = false)
+    @NotBlank(message = "Loan type is required (PERSONAL, HOME, AUTO, EDUCATION)")
     private String loanType;
+
+    @Column(name = "loan_amount", nullable = false)
+    @DecimalMin(value = "100.0", message = "Minimum loan amount is $100")
     private BigDecimal loanAmount;
+
+    @Column(name = "amount_paid", nullable = false)
     private BigDecimal amountPaid;
     private BigDecimal remainingBalance;
     private BigDecimal interestRate;
