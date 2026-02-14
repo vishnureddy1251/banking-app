@@ -1,6 +1,8 @@
 package com.banking.app.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.*;
 
@@ -27,5 +29,17 @@ public class Loan {
     private LocalDateTime appliedDate;
     private LocalDateTime approvedDate;
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate(){
+        this.appliedDate = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        this.remainingBalance = this.loanAmount;
+    }
+
+    @PreUpdate
+    protected void onUpdated(){
+        this.updatedAt = LocalDateTime.now();
+    }
 
 }
