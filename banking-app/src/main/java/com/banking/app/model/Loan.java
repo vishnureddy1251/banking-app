@@ -33,12 +33,26 @@ public class Loan {
 
     @Column(name = "amount_paid", nullable = false)
     private BigDecimal amountPaid;
+
+    @Column(name = "remaining_balance")
     private BigDecimal remainingBalance;
+
+    @Column(name = "interest_rate", nullable = false)
     private BigDecimal interestRate;
+
+    @Column(name = "tenure_months", nullable = false)
     private Integer tenureMonths;
+
+    @Column(name = "status", nullable = false)
     private String status = "PENDING";
+
+    @Column(name = "applied_date")
     private LocalDateTime appliedDate;
+
+    @Column(name = "approved_date")
     private LocalDateTime approvedDate;
+
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @PrePersist
