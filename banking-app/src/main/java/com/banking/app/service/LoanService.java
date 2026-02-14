@@ -1,5 +1,6 @@
 package com.banking.app.service;
 
+import com.banking.app.exception.AccountNotFoundException;
 import com.banking.app.model.Loan;
 import com.banking.app.repository.LoanRepository;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -28,5 +30,28 @@ public class LoanService {
         Loan saved = loanRepository.save(loan);
         log.info("Loan application submitted: ID {} for account {}", saved.getId(), saved.getAccountId());
         return saved;
+    }
+
+    @Transactional
+    public Loan approveLoan(Long loanId) {
+        Loan loan = getLoanById(loanId);
+
+        if (!"PENDING".equals(loan.getStatus())) {
+            throw new IllegalArgumentException("Loan is not in PENDING status. Current: " + loan.getStatus());
+        }
+
+        loan.setStatus("ACTIVE");
+        loan.setApprovedDate(LocalDateTime.now());
+        Loan saved = loanRepository.save(loan);
+
+        accountService.deposit(loan.getAccountId(), loan.getLoanAmount());
+
+        log.info("Loan approved: ID {} - ${} deposited to account {}", loanId, loan.getLoanAmount(), loan.getAccountId());
+        return saved;
+    }
+
+    public Loan getLoanById(Long id) {
+        return loanRepository.findById(id)
+                .orElseThrow(() -> new AccountNotFoundException("Loan not found with ID: " + id));
     }
 }
