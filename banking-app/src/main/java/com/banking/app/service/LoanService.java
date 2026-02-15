@@ -50,6 +50,20 @@ public class LoanService {
         return saved;
     }
 
+    @Transactional
+    public Loan rejectLoan(Long loanId) {
+        Loan loan = getLoanById(loanId);
+
+        if (!"PENDING".equals(loan.getStatus())) {
+            throw new IllegalArgumentException("Loan is not in PENDING status. Current: " + loan.getStatus());
+        }
+
+        loan.setStatus("REJECTED");
+        Loan saved = loanRepository.save(loan);
+        log.info("Loan rejected: ID {}", loanId);
+        return saved;
+    }
+
     public Loan getLoanById(Long id) {
         return loanRepository.findById(id)
                 .orElseThrow(() -> new AccountNotFoundException("Loan not found with ID: " + id));
