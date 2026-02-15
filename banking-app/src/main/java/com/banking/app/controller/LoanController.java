@@ -8,7 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/loans")
@@ -41,5 +43,21 @@ public class LoanController {
     @GetMapping("/status/{status}")
     public ResponseEntity<List<Loan>> getLoansByStatus(@PathVariable String status) {
         return ResponseEntity.ok(loanService.getLoansByStatus(status));
+    }
+
+    @PutMapping("/{id}/approve")
+    public ResponseEntity<Loan> approveLoan(@PathVariable Long id) {
+        return ResponseEntity.ok(loanService.approveLoan(id));
+    }
+
+    @PutMapping("/{id}/reject")
+    public ResponseEntity<Loan> rejectLoan(@PathVariable Long id) {
+        return ResponseEntity.ok(loanService.rejectLoan(id));
+    }
+
+    @PutMapping("/{id}/repay")
+    public ResponseEntity<Loan> repayLoan(@PathVariable Long id, @RequestBody Map<String, BigDecimal> request) {
+        BigDecimal amount = request.get("amount");
+        return ResponseEntity.ok(loanService.repayLoan(id, amount));
     }
 }
