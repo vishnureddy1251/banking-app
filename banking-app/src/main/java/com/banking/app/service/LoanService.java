@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -99,5 +100,17 @@ public class LoanService {
     public Loan getLoanById(Long id) {
         return loanRepository.findById(id)
                 .orElseThrow(() -> new AccountNotFoundException("Loan not found with ID: " + id));
+    }
+
+    public List<Loan> getAllLoans() {
+        return loanRepository.findAll();
+    }
+
+    public List<Loan> getLoansByAccountId(Long accountId) {
+        return loanRepository.findByAccountId(accountId);
+    }
+
+    public List<Loan> getLoansByStatus(String status) {
+        return loanRepository.findByStatus(status.toUpperCase());
     }
 }
