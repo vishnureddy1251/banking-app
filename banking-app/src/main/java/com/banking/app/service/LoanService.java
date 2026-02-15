@@ -64,6 +64,38 @@ public class LoanService {
         return saved;
     }
 
+    @Transactional
+    public Loan repayLoan(Long loanId, BigDecimal amount) {
+        Loan loan = getLoanById(loanId);
+
+        if (!"ACTIVE".equals(loan.getStatus())) {
+            throw new IllegalArgumentException("Loan is not ACTIVE. Current: " + loan.getStatus());
+        }
+
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Repayment amount must be positive");
+        }
+
+        if (amount.compareTo(loan.getRemainingBalance()) > 0) {
+            throw new IllegalArgumentException(
+                    "Payment exceeds remaining balance. Remaining: $" + loan.getRemainingBalance());
+        }
+
+        accountService.withdraw(loan.getAccountId(), amount);
+
+        loan.setAmountPaid(loan.getAmountPaid().add(amount));
+        loan.setRemainingBalance(loan.getRemainingBalance().subtract(amount));
+
+        if (loan.getRemainingBalance().compareTo(BigDecimal.ZERO) == 0) {
+            loan.setStatus("CLOSED");
+            log.info("Loan fully repaid and CLOSED: ID {}", loanId);
+        }
+
+        Loan saved = loanRepository.save(loan);
+        log.info("Loan repayment: ID {} - ${} paid. Remaining: ${}", loanId, amount, saved.getRemainingBalance());
+        return saved;
+    }
+
     public Loan getLoanById(Long id) {
         return loanRepository.findById(id)
                 .orElseThrow(() -> new AccountNotFoundException("Loan not found with ID: " + id));
