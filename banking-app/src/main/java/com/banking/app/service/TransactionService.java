@@ -18,15 +18,14 @@ public class TransactionService {
 
     public Transaction logTransaction(Long accountId, String type, BigDecimal amount,
                                       BigDecimal balanceAfter, Long relatedAccountId,
-                                      String description){
-        Transaction transaction = Transaction.builder()
-                .accountId(accountId)
-                .transactionType(type)
-                .amount(amount)
-                .balanceAfter(balanceAfter)
-                .relatedAccountId(relatedAccountId)
-                .description(description)
-                .build();
+                                      String description) {
+        Transaction transaction = new Transaction();
+        transaction.setAccountId(accountId);
+        transaction.setTransactionType(type);
+        transaction.setAmount(amount);
+        transaction.setBalanceAfter(balanceAfter);
+        transaction.setRelatedAccountId(relatedAccountId);
+        transaction.setDescription(description);
 
         Transaction saved = transactionRepository.save(transaction);
         log.info("Transaction logged: {} - {} - ${}", type, accountId, amount);

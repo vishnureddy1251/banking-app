@@ -23,8 +23,11 @@ public class Transaction {
     @Column(name = "transaction_type", nullable = false)
     private String transactionType;
 
-    @Column(name = "balance_after", nullable = false)
+    @Column(name = "amount", nullable = false)
     private BigDecimal amount;
+
+    @Column(name = "balance_after", nullable = false)
+    private BigDecimal balanceAfter;
 
     @Column(name = "related_account_id")
     private Long relatedAccountId;
