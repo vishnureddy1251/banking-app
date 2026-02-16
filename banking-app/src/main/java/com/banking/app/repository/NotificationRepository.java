@@ -7,4 +7,12 @@ import java.util.List;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
+
+    List<Notification> findByAccountIdOrderByCreatedAtDesc(Long accountId);
+
+    List<Notification> findByAccountIdAndIsReadFalseOrderByCreatedAtDesc(Long accountId);
+
+    List<Notification> findByAccountIdAndCategory(Long accountId, String category);
+
+    long countByAccountIdAndIsReadFalse(Long accountId);
 }
