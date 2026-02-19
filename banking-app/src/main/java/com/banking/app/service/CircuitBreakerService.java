@@ -19,7 +19,7 @@ public class CircuitBreakerService {
     @CircuitBreaker(name = "paymentService", fallbackMethod = "PaymentFallback")
     public Map<String, Object> processPayment(Long accountId, BigDecimal amount, String description){
         log.info("Processing payment through circuit breaker...");
-        return PaymentGatewayService.processPayment(accountId, amount, description);
+        return paymentGatewayService.processPayment(accountId, amount, description);
     }
 
     public Map<String, Object> paymentFallback(Long accountId, BigDecimal amount,
