@@ -47,6 +47,16 @@ public class PaymentGatewayService {
 
     }
 
+    public void enableFailureMode(){
+        this.failureMode = true;
+        log.warn("Payment Gateway FAILURE MODE ENABLED");
+    }
+
+    public void disableFailureMode(){
+        this.failureMode = false;
+        log.info("Payment Gateway FAILURE MODE DISABLED - Gateway recovered");
+    }
+
     public boolean isFailureModeEnabled(){
         return this.failureMode;
     }
