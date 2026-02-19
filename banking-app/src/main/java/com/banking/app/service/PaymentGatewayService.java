@@ -30,6 +30,21 @@ public class PaymentGatewayService {
             throw new RuntimeException("Payment Gateway is unavailable - connection timeout");
         }
 
+        if (random.nextInt(10) < 3){
+            log.error("Payment Gateway random failure!");
+            throw new RuntimeException("Payment Gateway error - service temporarily unavailable");
+        }
+
+        String transactionRef = "PG" + System.currentTimeMillis();
+        log.info("Payment successful! Ref: {}", transactionRef);
+
+        return Map.of(
+                "status", "SUCCESS",
+                "referenceNumber", transactionRef,
+                "amount", amount.toString(),
+                "message", "Payment processed successfully"
+        );
+
     }
 
     public boolean isFailureModeEnabled(){
