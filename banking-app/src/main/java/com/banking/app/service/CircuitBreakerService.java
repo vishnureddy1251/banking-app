@@ -34,6 +34,45 @@ public class CircuitBreakerService {
         );
     }
 
+
+    @CircuitBreaker(name = "loanService", fallbackMethod = "loanFallback")
+    public Map<String, Object> processLoanApproval(Long loanId) {
+        log.info("Processing loan approval through circuit breaker...");
+        simulateExternalCall("Credit Check Service");
+        return Map.of(
+                "status", "APPROVED",
+                "loanId", loanId,
+                "message", "Loan approved after credit check",
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
+
+    public Map<String, Object> loanFallback(Long loanId, Throwable throwable) {
+        log.warn("CIRCUIT BREAKER ACTIVATED for loan! Reason: {}", throwable.getMessage());
+        return Map.of(
+                "status", "PENDING",
+                "loanId", loanId,
+                "message", "Credit check service is down. Loan queued for manual review.",
+                "fallback", true,
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
+
+    @CircuitBreaker(name = "transferService", fallbackMethod = "transferFallback")
+    public Map<String, Object> processExternalTransfer(Long fromAccount, Long toAccount,
+                                                       BigDecimal amount) {
+        log.info("Processing external transfer through circuit breaker...");
+        simulateExternalCall("External Bank API");
+        return Map.of(
+                "status", "SUCCESS",
+                "from", fromAccount,
+                "to", toAccount,
+                "amount", amount.toString(),
+                "message", "External transfer completed",
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
+
     public Map<String, Object> transferFallback(Long fromAccount, Long toAccount,
                                                 BigDecimal amount, Throwable throwable) {
         log.warn("CIRCUIT BREAKER ACTIVATED for transfer! Reason: {}", throwable.getMessage());
