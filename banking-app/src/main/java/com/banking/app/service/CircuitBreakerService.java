@@ -49,4 +49,15 @@ public class CircuitBreakerService {
                 "timestamp", LocalDateTime.now().toString()
         );
     }
+
+    private void simulateExternalCall(String serviceName){
+        if (Math.random() < 0.4){
+            throw new RuntimeException(serviceName + " is not responding - connection timeout");
+        }
+        try {
+            Thread.sleep(300);
+        }catch (InterruptedException e){
+            Thread.currentThread().interrupt();
+        }
+    }
 }
