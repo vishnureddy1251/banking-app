@@ -54,4 +54,21 @@ public class CircuitBreakerController {
                 "status", "DOWN"
         ));
     }
+
+    @PostMapping("/gateway/up")
+    public ResponseEntity<Map<String, String>> gatewayUp() {
+        paymentGatewayService.disableFailureMode();
+        return ResponseEntity.ok(Map.of(
+                "message", "Payment Gateway has RECOVERED (failure mode disabled)",
+                "status", "UP"
+        ));
+    }
+
+    @GetMapping("/gateway/status")
+    public ResponseEntity<Map<String, Object>> gatewayStatus() {
+        return ResponseEntity.ok(Map.of(
+                "gatewayUp", !paymentGatewayService.isFailureModeEnabled(),
+                "failureMode", paymentGatewayService.isFailureModeEnabled()
+        ));
+    }
 }
