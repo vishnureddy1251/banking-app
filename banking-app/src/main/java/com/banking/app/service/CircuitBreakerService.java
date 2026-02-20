@@ -16,8 +16,8 @@ public class CircuitBreakerService {
 
     private final PaymentGatewayService paymentGatewayService;
 
-    @CircuitBreaker(name = "paymentService", fallbackMethod = "PaymentFallback")
-    public Map<String, Object> processPayment(Long accountId, BigDecimal amount, String description){
+    @CircuitBreaker(name = "paymentService", fallbackMethod = "paymentFallback")
+    public Map<String, Object> processPayment(Long accountId, BigDecimal amount, String description) {
         log.info("Processing payment through circuit breaker...");
         return paymentGatewayService.processPayment(accountId, amount, description);
     }
@@ -25,7 +25,6 @@ public class CircuitBreakerService {
     public Map<String, Object> paymentFallback(Long accountId, BigDecimal amount,
                                                String description, Throwable throwable) {
         log.warn("CIRCUIT BREAKER ACTIVATED for payment! Reason: {}", throwable.getMessage());
-
         return Map.of(
                 "status", "FAILED",
                 "message", "Payment service is temporarily unavailable. Please try again later.",
@@ -38,7 +37,6 @@ public class CircuitBreakerService {
     public Map<String, Object> transferFallback(Long fromAccount, Long toAccount,
                                                 BigDecimal amount, Throwable throwable) {
         log.warn("CIRCUIT BREAKER ACTIVATED for transfer! Reason: {}", throwable.getMessage());
-
         return Map.of(
                 "status", "QUEUED",
                 "from", fromAccount,
@@ -50,13 +48,13 @@ public class CircuitBreakerService {
         );
     }
 
-    private void simulateExternalCall(String serviceName){
-        if (Math.random() < 0.4){
+    private void simulateExternalCall(String serviceName) {
+        if (Math.random() < 0.4) {
             throw new RuntimeException(serviceName + " is not responding - connection timeout");
         }
         try {
             Thread.sleep(300);
-        }catch (InterruptedException e){
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     }
