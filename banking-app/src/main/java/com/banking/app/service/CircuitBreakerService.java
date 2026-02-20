@@ -34,4 +34,19 @@ public class CircuitBreakerService {
                 "timestamp", LocalDateTime.now().toString()
         );
     }
+
+    public Map<String, Object> transferFallback(Long fromAccount, Long toAccount,
+                                                BigDecimal amount, Throwable throwable) {
+        log.warn("CIRCUIT BREAKER ACTIVATED for transfer! Reason: {}", throwable.getMessage());
+
+        return Map.of(
+                "status", "QUEUED",
+                "from", fromAccount,
+                "to", toAccount,
+                "amount", amount.toString(),
+                "message", "External bank service is down. Transfer queued and will be retried.",
+                "fallback", true,
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
 }
