@@ -45,4 +45,13 @@ public class CircuitBreakerController {
                 fromAccount, toAccount, amount);
         return ResponseEntity.ok(result);
     }
+
+    @PostMapping("/gateway/down")
+    public ResponseEntity<Map<String, String>> gatewayDown() {
+        paymentGatewayService.enableFailureMode();
+        return ResponseEntity.ok(Map.of(
+                "message", "Payment Gateway is now DOWN (failure mode enabled)",
+                "status", "DOWN"
+        ));
+    }
 }
