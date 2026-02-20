@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -70,5 +71,23 @@ public class CircuitBreakerController {
                 "gatewayUp", !paymentGatewayService.isFailureModeEnabled(),
                 "failureMode", paymentGatewayService.isFailureModeEnabled()
         ));
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<Map<String, Object>> circuitBreakerStatus() {
+        Map<String, Object> statuses = new HashMap<>();
+
+        circuitBreakerRegistry.getAllCircuitBreakers().forEach(cb -> {
+            Map<String, Object> details = new HashMap<>();
+            details.put("state", cb.getState().toString());
+            details.put("failureRate", cb.getMetrics().getFailureRate() + "%");
+            details.put("totalCalls", cb.getMetrics().getNumberOfBufferedCalls());
+            details.put("failedCalls", cb.getMetrics().getNumberOfFailedCalls());
+            details.put("successCalls", cb.getMetrics().getNumberOfSuccessfulCalls());
+            details.put("notPermittedCalls", cb.getMetrics().getNumberOfNotPermittedCalls());
+            statuses.put(cb.getName(), details);
+        });
+
+        return ResponseEntity.ok(statuses);
     }
 }
