@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @Slf4j
-public class RateLimitFilter {
+public class RateLimitFilter implements Filter {
 
     private final Map<String, Bucket> bucketCache = new ConcurrentHashMap<>();
 
