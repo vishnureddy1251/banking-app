@@ -58,4 +58,37 @@ public class AuditInterceptor implements HandlerInterceptor{
         );
     }
 
+    private String mapHttpMethodToAction(String method) {
+        return switch (method.toUpperCase()) {
+            case "POST" -> "CREATE";
+            case "GET" -> "READ";
+            case "PUT" -> "UPDATE";
+            case "DELETE" -> "DELETE";
+            default -> method;
+        };
+    }
+
+    private String extractEntityType(String endpoint) {
+        if (endpoint.contains("/accounts")) return "ACCOUNT";
+        if (endpoint.contains("/transactions")) return "TRANSACTION";
+        if (endpoint.contains("/customers")) return "CUSTOMER";
+        if (endpoint.contains("/loans")) return "LOAN";
+        if (endpoint.contains("/bills")) return "BILL_PAYMENT";
+        if (endpoint.contains("/notifications")) return "NOTIFICATION";
+        if (endpoint.contains("/auth")) return "AUTH";
+        if (endpoint.contains("/circuit-breaker")) return "CIRCUIT_BREAKER";
+        return "UNKNOWN";
+    }
+
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty()) {
+            ip = request.getHeader("X-Real-IP");
+        }
+        if (ip == null || ip.isEmpty()) {
+            ip = request.getRemoteAddr();
+        }
+        return ip;
+    }
+
 }
