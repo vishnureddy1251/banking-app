@@ -6,6 +6,8 @@ import com.banking.app.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,5 +38,29 @@ public class AuthService {
         log.info("User registered: {} with role {}", user.getUsername(), user.getRole());
 
         return Map.of("message", "User registered successfully");
+    }
+
+    public Map<String, String> login(String username, String password) {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(username, password));
+
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new BadCredentialsException("User not found"));
+
+            String token = jwtUtil.generateToken(user.getUsername(), user.getRole());
+
+            log.info("User logged in: {}", username);
+
+            return Map.of(
+                    "token", token,
+                    "username", user.getUsername(),
+                    "role", user.getRole(),
+                    "message", "Login successful"
+            );
+
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException("Invalid username or password");
+        }
     }
 }
