@@ -90,6 +90,7 @@ curl -X POST http://localhost:8080/api/auth/login \
 ```bash
 curl -X GET http://localhost:8080/api/v1/accounts \
   -H "Authorization: Bearer <your-token-here>"
+  
 ```
 
 ### Role-Based Access
