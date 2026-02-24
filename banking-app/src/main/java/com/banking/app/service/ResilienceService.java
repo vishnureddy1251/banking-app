@@ -84,4 +84,33 @@ public class ResilienceService {
                 "timestamp", LocalDateTime.now().toString()
         );
     }
+
+    public Map<String, Object> retryFallback(Long accountId, BigDecimal amount,
+                                             String description, Throwable throwable) {
+        log.warn("ALL RETRIES EXHAUSTED for payment! Reason: {}", throwable.getMessage());
+        paymentRetryCount.set(0);
+        return Map.of(
+                "status", "FAILED",
+                "message", "Payment failed after 3 retries with exponential backoff.",
+                "fallback", "RETRY_EXHAUSTED",
+                "reason", throwable.getMessage(),
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
+
+    public Map<String, Object> transferFallback(Long fromAccount, Long toAccount,
+                                                BigDecimal amount, Throwable throwable) {
+        log.warn("CIRCUIT BREAKER for transfer! Reason: {}", throwable.getMessage());
+        transferRetryCount.set(0);
+        return Map.of(
+                "status", "QUEUED",
+                "from", fromAccount,
+                "to", toAccount,
+                "amount", amount.toString(),
+                "message", "Transfer queued. External bank service is down.",
+                "fallback", "CIRCUIT_BREAKER",
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
+
 }
