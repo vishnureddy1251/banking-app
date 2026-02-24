@@ -56,4 +56,32 @@ public class ResilienceService {
                 "timestamp", LocalDateTime.now().toString()
         );
     }
+
+    @Bulkhead(name = "loanBulkhead", fallbackMethod = "bulkheadFallback")
+    @CircuitBreaker(name = "loanService", fallbackMethod = "loanFallback")
+    public Map<String, Object> processLoanWithResilience(Long loanId) {
+        log.info("Processing loan approval with resilience for loan {}", loanId);
+
+        simulateExternalCall("Credit Check Service");
+
+        return Map.of(
+                "status", "APPROVED",
+                "loanId", loanId,
+                "message", "Loan approved after credit check",
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
+
+    public Map<String, Object> paymentFallback(Long accountId, BigDecimal amount,
+                                               String description, Throwable throwable) {
+        log.warn("CIRCUIT BREAKER for payment! Reason: {}", throwable.getMessage());
+        paymentRetryCount.set(0);
+        return Map.of(
+                "status", "FAILED",
+                "message", "Payment service unavailable after all retries. Please try later.",
+                "fallback", "CIRCUIT_BREAKER",
+                "reason", throwable.getMessage(),
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
 }
