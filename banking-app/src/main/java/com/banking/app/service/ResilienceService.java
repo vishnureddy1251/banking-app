@@ -113,4 +113,43 @@ public class ResilienceService {
         );
     }
 
+    public Map<String, Object> loanFallback(Long loanId, Throwable throwable) {
+        log.warn("CIRCUIT BREAKER for loan! Reason: {}", throwable.getMessage());
+        return Map.of(
+                "status", "PENDING",
+                "loanId", loanId,
+                "message", "Credit check service down. Loan queued for manual review.",
+                "fallback", "CIRCUIT_BREAKER",
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
+
+    public Map<String, Object> bulkheadFallback(Long accountId, BigDecimal amount,
+                                                String description, Throwable throwable) {
+        log.warn("BULKHEAD FULL! Too many concurrent requests. Reason: {}", throwable.getMessage());
+        return Map.of(
+                "status", "REJECTED",
+                "message", "Server is busy. Too many concurrent requests. Please try again.",
+                "fallback", "BULKHEAD_FULL",
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
+
+    public Map<String, Object> getResilienceStats() {
+        return Map.of(
+                "paymentRetryAttempts", paymentRetryCount.get(),
+                "transferRetryAttempts", transferRetryCount.get()
+        );
+    }
+
+    private void simulateExternalCall(String serviceName) {
+        if (Math.random() < 0.4) {
+            throw new RuntimeException(serviceName + " is not responding - connection timeout");
+        }
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
 }
