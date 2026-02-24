@@ -46,6 +46,9 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/**").permitAll()
 
                         .requestMatchers("/api/v1/circuit-breaker/**").permitAll()
+                        .requestMatchers("/api/v1/resilience/**").permitAll()
+                        .requestMatchers("/api/v1/cache/**").permitAll()
+                        .requestMatchers("/api/v1/events/**").authenticated()
 
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/accounts/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/loans/*/approve").hasAuthority("ROLE_ADMIN")
