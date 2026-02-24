@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -33,5 +34,26 @@ public class ResilienceService {
 
         paymentRetryCount.set(0);
         return result;
+    }
+
+    @Bulkhead(name = "transferBulkhead", fallbackMethod = "bulkheadFallback")
+    @Retry(name = "transferRetry", fallbackMethod = "retryFallback")
+    @CircuitBreaker(name = "transferService", fallbackMethod = "transferFallback")
+    public Map<String, Object> processTransferWithResilience(Long fromAccount, Long toAccount,
+                                                             BigDecimal amount) {
+        int attempt = transferRetryCount.incrementAndGet();
+        log.info("Transfer attempt #{} from {} to {} - ${}", attempt, fromAccount, toAccount, amount);
+
+        simulateExternalCall("External Bank API");
+
+        transferRetryCount.set(0);
+        return Map.of(
+                "status", "SUCCESS",
+                "from", fromAccount,
+                "to", toAccount,
+                "amount", amount.toString(),
+                "message", "External transfer completed",
+                "timestamp", LocalDateTime.now().toString()
+        );
     }
 }
