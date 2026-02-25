@@ -86,6 +86,24 @@ public class EventSourcingService {
                     break;
             }
         }
+
+        
+        AccountEvent lastEvent = events.get(events.size() - 1);
+
+        Map<String, Object> state = new LinkedHashMap<>();
+        state.put("accountId", accountId);
+        state.put("calculatedBalance", calculatedBalance);
+        state.put("storedBalance", lastEvent.getBalanceAfter());
+        state.put("balancesMatch", calculatedBalance.compareTo(lastEvent.getBalanceAfter()) == 0);
+        state.put("totalDeposits", totalDeposits);
+        state.put("totalWithdrawals", totalWithdrawals);
+        state.put("totalTransfersIn", totalTransfersIn);
+        state.put("totalTransfersOut", totalTransfersOut);
+        state.put("totalEvents", eventCount);
+        state.put("firstEvent", events.get(0).getEventTimestamp().toString());
+        state.put("lastEvent", lastEvent.getEventTimestamp().toString());
+
+        return state;
     }
 
 }
