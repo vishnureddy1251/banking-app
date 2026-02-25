@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -40,4 +43,49 @@ public class EventSourcingService {
                 eventType, accountId, amount, balanceAfter);
         return saved;
     }
+
+    public List<AccountEvent> getEventHistory(Long accountId) {
+        return eventRepository.findByAccountIdOrderBySequenceNumberAsc(accountId);
+    }
+
+    public Map<String, Object> rebuildAccountState(Long accountId) {
+        List<AccountEvent> events = getEventHistory(accountId);
+
+        if (events.isEmpty()) {
+            return Map.of("error", "No events found for account " + accountId);
+        }
+
+        BigDecimal calculatedBalance = BigDecimal.ZERO;
+        BigDecimal totalDeposits = BigDecimal.ZERO;
+        BigDecimal totalWithdrawals = BigDecimal.ZERO;
+        BigDecimal totalTransfersIn = BigDecimal.ZERO;
+        BigDecimal totalTransfersOut = BigDecimal.ZERO;
+        int eventCount = 0;
+
+        for (AccountEvent event : events) {
+            eventCount++;
+            switch (event.getEventType()) {
+                case "ACCOUNT_CREATED":
+                    calculatedBalance = event.getBalanceAfter();
+                    break;
+                case "DEPOSITED":
+                    calculatedBalance = calculatedBalance.add(event.getAmount());
+                    totalDeposits = totalDeposits.add(event.getAmount());
+                    break;
+                case "WITHDRAWN":
+                    calculatedBalance = calculatedBalance.subtract(event.getAmount());
+                    totalWithdrawals = totalWithdrawals.add(event.getAmount());
+                    break;
+                case "TRANSFERRED_IN":
+                    calculatedBalance = calculatedBalance.add(event.getAmount());
+                    totalTransfersIn = totalTransfersIn.add(event.getAmount());
+                    break;
+                case "TRANSFERRED_OUT":
+                    calculatedBalance = calculatedBalance.subtract(event.getAmount());
+                    totalTransfersOut = totalTransfersOut.add(event.getAmount());
+                    break;
+            }
+        }
+    }
+
 }
