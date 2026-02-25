@@ -106,4 +106,40 @@ public class EventSourcingService {
         return state;
     }
 
+    public Map<String, Object> getStateAtEvent(Long accountId, Long sequenceNumber) {
+        List<AccountEvent> events = getEventHistory(accountId);
+
+        BigDecimal balance = BigDecimal.ZERO;
+        AccountEvent targetEvent = null;
+
+        for (AccountEvent event : events) {
+            if (event.getSequenceNumber() > sequenceNumber) break;
+
+            targetEvent = event;
+            switch (event.getEventType()) {
+                case "ACCOUNT_CREATED":
+                    balance = event.getBalanceAfter();
+                    break;
+                case "DEPOSITED", "TRANSFERRED_IN":
+                    balance = balance.add(event.getAmount());
+                    break;
+                case "WITHDRAWN", "TRANSFERRED_OUT":
+                    balance = balance.subtract(event.getAmount());
+                    break;
+            }
+        }
+
+        if (targetEvent == null) {
+            return Map.of("error", "No events found up to sequence " + sequenceNumber);
+        }
+
+        return Map.of(
+                "accountId", accountId,
+                "atSequence", sequenceNumber,
+                "balanceAtThatPoint", balance,
+                "eventType", targetEvent.getEventType(),
+                "timestamp", targetEvent.getEventTimestamp().toString()
+        );
+    }
+
 }
