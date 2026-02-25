@@ -142,4 +142,17 @@ public class EventSourcingService {
         );
     }
 
+    public List<AccountEvent> getEventsByType(Long accountId, String eventType) {
+        return eventRepository.findByAccountIdAndEventTypeOrderBySequenceNumberAsc(
+                accountId, eventType.toUpperCase());
+    }
+
+    private String getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            return auth.getName();
+        }
+        return "SYSTEM";
+    }
+
 }
