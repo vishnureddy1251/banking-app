@@ -15,4 +15,16 @@ import lombok.RequiredArgsConstructor;
         private final CircuitBreakerRegistry circuitBreakerRegistry;
         private final RetryRegistry retryRegistry;
         private final BulkheadRegistry bulkheadRegistry;
+
+        @PostMapping("/payment")
+        public ResponseEntity<Map<String, Object>> testPayment(@RequestBody Map<String, Object> request) {
+            Long accountId = Long.valueOf(request.get("accountId").toString());
+            BigDecimal amount = new BigDecimal(request.get("amount").toString());
+            String description = request.getOrDefault("description", "Test payment").toString();
+
+            Map<String, Object> result = resilienceService.processPaymentWithResilience(
+                accountId, amount, description);
+            return ResponseEntity.ok(result);
     }
+
+}
