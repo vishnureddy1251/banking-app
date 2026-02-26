@@ -3,6 +3,8 @@ package com.banking.app.controller;
 import java.math.BigDecimal;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,6 +34,16 @@ public class EventSourcingController {
         AccountEvent event = eventSourcingService.publishEvent(
                 accountId, eventType, amount, balanceAfter, relatedAccountId, metadata);
         return ResponseEntity.ok(event);
+    }
+
+    @GetMapping("/history/{accountId}")
+    public ResponseEntity<List<AccountEvent>> getEventHistory(@PathVariable Long accountId) {
+        return ResponseEntity.ok(eventSourcingService.getEventHistory(accountId));
+    }
+
+        @GetMapping("/account/{accountId}/rebuild")
+    public ResponseEntity<Map<String, Object>> rebuildState(@PathVariable Long accountId) {
+        return ResponseEntity.ok(eventSourcingService.rebuildAccountState(accountId));
     }
 
 }
