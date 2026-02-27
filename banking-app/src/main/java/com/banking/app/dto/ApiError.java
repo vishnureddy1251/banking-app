@@ -18,7 +18,7 @@ import lombok.Setter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiError {
 
-        private int status;
+    private int status;
     private String error;
     private String message;
     private String path;
