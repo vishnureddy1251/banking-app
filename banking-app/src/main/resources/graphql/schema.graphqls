@@ -109,3 +109,15 @@ type TransferResult {
     toAccountId: ID!
     amount: Float!
 }
+
+input CreateAccountInput {
+    accountName: String!
+    accountType: String!
+    balance: Float
+}
+
+input TransferInput {
+    fromAccountId: ID!
+    toAccountId: ID!
+    amount: Float!
+}
