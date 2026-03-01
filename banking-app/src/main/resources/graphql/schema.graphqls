@@ -121,3 +121,22 @@ input TransferInput {
     toAccountId: ID!
     amount: Float!
 }
+
+input CreateCustomerInput {
+    firstName: String!
+    lastName: String!
+    email: String!
+    phone: String
+    address: String
+    city: String
+    state: String
+    zipCode: String
+}
+
+input ApplyLoanInput {
+    accountId: ID!
+    loanType: String!
+    loanAmount: Float!
+    interestRate: Float!
+    tenureMonths: Int!
+}
