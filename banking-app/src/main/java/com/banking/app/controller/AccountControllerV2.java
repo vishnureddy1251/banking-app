@@ -1,19 +1,19 @@
 package com.banking.app.controller;
 
 import com.banking.app.dto.AccountResponseV2;
+import com.banking.app.dto.TransferRequestV2;
 import com.banking.app.model.Account;
 import com.banking.app.service.AccountService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v2/accounts")
@@ -35,6 +35,20 @@ public class AccountControllerV2 {
     public ResponseEntity<AccountResponseV2> getAccountById(@PathVariable Long id) {
         Account account = accountService.getAccountById(id);
         return ResponseEntity.ok(toV2Response(account));
+    }
+
+    @PostMapping
+    public ResponseEntity<AccountResponseV2> createAccount(@Valid @RequestBody Account account) {
+        Account created = accountService.createAccount(account);
+        return ResponseEntity.ok(toV2Response(created));
+    }
+
+    @PutMapping("/{id}/deposit")
+    public ResponseEntity<AccountResponseV2> deposit(
+            @PathVariable Long id, @RequestBody Map<String, BigDecimal> request) {
+        BigDecimal amount = request.get("amount");
+        Account updated = accountService.deposit(id, amount);
+        return ResponseEntity.ok(toV2Response(updated));
     }
 
     private AccountResponseV2 toV2Response(Account account) {
