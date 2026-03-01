@@ -51,6 +51,41 @@ public class AccountControllerV2 {
         return ResponseEntity.ok(toV2Response(updated));
     }
 
+    @PutMapping("/{id}/withdraw")
+    public ResponseEntity<AccountResponseV2> withdraw(
+            @PathVariable Long id, @RequestBody Map<String, BigDecimal> request) {
+        BigDecimal amount = request.get("amount");
+        Account updated = accountService.withdraw(id, amount);
+        return ResponseEntity.ok(toV2Response(updated));
+    }
+
+    @PostMapping("/transfer")
+    public ResponseEntity<Map<String, Object>> transfer(
+            @Valid @RequestBody TransferRequestV2 request) {
+        String result = accountService.transfer(
+                request.getFromAccountId(),
+                request.getToAccountId(),
+                request.getAmount());
+
+        return ResponseEntity.ok(Map.of(
+                "message", result,
+                "fromAccountId", request.getFromAccountId(),
+                "toAccountId", request.getToAccountId(),
+                "amount", request.getAmount(),
+                "formattedAmount", currencyFormatter.format(request.getAmount()),
+                "apiVersion", "v2"
+        ));
+    }
+    
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> deleteAccount(@PathVariable Long id) {
+        accountService.deleteAccount(id);
+        return ResponseEntity.ok(Map.of(
+                "message", "Account " + id + " deleted successfully",
+                "apiVersion", "v2"
+        ));
+    }
+
     private AccountResponseV2 toV2Response(Account account) {
         return AccountResponseV2.builder()
                 .id(account.getId())
