@@ -4,6 +4,8 @@ import com.banking.app.model.AccountEvent;
 import com.banking.app.repository.AccountEventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +26,7 @@ public class EventSourcingService {
                                      BigDecimal balanceAfter, Long relatedAccountId,
                                      String metadata) {
 
-        Long sequenceNumber = eventRepository.getNextSequenceNumber(accountId);
+        Long sequenceNumber = accountEventRepository.getNextSequenceNumber(accountId);
         String triggeredBy = getCurrentUser();
 
         AccountEvent event = AccountEvent.builder()
@@ -38,14 +40,14 @@ public class EventSourcingService {
                 .sequenceNumber(sequenceNumber)
                 .build();
 
-        AccountEvent saved = eventRepository.save(event);
+        AccountEvent saved = accountEventRepository.save(event);
         log.info("EVENT PUBLISHED: [{}] Account {} - ${} - Balance: {}",
                 eventType, accountId, amount, balanceAfter);
         return saved;
     }
 
     public List<AccountEvent> getEventHistory(Long accountId) {
-        return eventRepository.findByAccountIdOrderBySequenceNumberAsc(accountId);
+        return accountEventRepository.findByAccountIdOrderBySequenceNumberAsc(accountId);
     }
 
     public Map<String, Object> rebuildAccountState(Long accountId) {
@@ -87,7 +89,7 @@ public class EventSourcingService {
             }
         }
 
-        
+
         AccountEvent lastEvent = events.get(events.size() - 1);
 
         Map<String, Object> state = new LinkedHashMap<>();
@@ -143,7 +145,7 @@ public class EventSourcingService {
     }
 
     public List<AccountEvent> getEventsByType(Long accountId, String eventType) {
-        return eventRepository.findByAccountIdAndEventTypeOrderBySequenceNumberAsc(
+        return accountEventRepository.findByAccountIdAndEventTypeOrderBySequenceNumberAsc(
                 accountId, eventType.toUpperCase());
     }
 
