@@ -1,0 +1,17 @@
+type Query {
+    allAccounts: [Account!]!
+    accountById(id: ID!): Account
+    allCustomers: [Customer!]!
+    customerById(id: ID!): Customer
+    searchCustomers(name: String!): [Customer!]!
+    transactionsByAccount(accountId: ID!): [Transaction!]!
+    transactionsByType(accountId: ID!, type: String!): [Transaction!]!
+    allLoans: [Loan!]!
+    loanById(id: ID!): Loan
+    loansByAccount(accountId: ID!): [Loan!]!
+    loansByStatus(status: String!): [Loan!]!
+    notificationsByAccount(accountId: ID!): [Notification!]!
+    unreadNotifications(accountId: ID!): [Notification!]!
+    unreadCount(accountId: ID!): Int!
+    billsByAccount(accountId: ID!): [BillPayment!]!
+}
