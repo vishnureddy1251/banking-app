@@ -4,225 +4,177 @@ A banking REST API built with **Spring Boot**, featuring account management, tra
 
 ---
 
-## 🏗️ Architecture
-
-```
-Client (Postman / Browser / Swagger UI)
-        ↓ HTTP Request
+🏗️ Architecture
+Client (Postman / Browser / Swagger UI / GraphiQL)
+↓ HTTP Request
 ┌──────────────────────────────┐
 │      Rate Limiting Filter    │  ← 20 requests/min per IP (Bucket4j)
 ├──────────────────────────────┤
 │      JWT Auth Filter         │  ← Validates Bearer token
 ├──────────────────────────────┤
-│      Controller Layer        │  ← Handles HTTP requests/responses
+│      Global Exception Handler│  ← Consistent error responses
 ├──────────────────────────────┤
-│      Service Layer           │  ← Business logic & validations
+│   REST Controllers (v1/v2)   │  ← Versioned REST endpoints
+│   GraphQL Resolvers          │  ← Query & Mutation resolvers
 ├──────────────────────────────┤
-│      Circuit Breaker         │  ← Resilience4j fallback protection
+│      Service Layer           │  ← Business logic & caching
+├──────────────────────────────┤
+│  Resilience4j (CB/Retry/BH)  │  ← Circuit Breaker + Retry + Bulkhead
 ├──────────────────────────────┤
 │      Repository Layer        │  ← Database operations (JPA)
 ├──────────────────────────────┤
-│      Audit Interceptor       │  ← Logs every API action
+│  Audit Interceptor + Events  │  ← Logs actions + Event Sourcing
 ├──────────────────────────────┤
 │     SQLite Database (File)   │  ← Persistent data storage
 └──────────────────────────────┘
-```
 
----
+🛠️ Tech Stack
+TechnologyPurposeJava 17Programming languageSpring Boot 3.5Application frameworkSpring Data JPAORM & database accessSpring SecurityAuthentication & authorizationJWT (JJWT)Token-based authenticationSpring GraphQLGraphQL API alongside RESTSQLitePersistent file-based databaseResilience4jCircuit Breaker, Retry, BulkheadCaffeineIn-memory cachingBucket4jAPI rate limitingSwagger/OpenAPIInteractive REST API documentationLombokReduces boilerplate codeMavenBuild & dependency management
 
-## 🛠️ Tech Stack
-
-| Technology        | Purpose                          |
-|-------------------|----------------------------------|
-| Java 17           | Programming language             |
-| Spring Boot 3.5   | Application framework            |
-| Spring Data JPA   | ORM & database access            |
-| Spring Security   | Authentication & authorization   |
-| JWT (JJWT)        | Token-based authentication       |
-| SQLite            | Persistent file-based database   |
-| Resilience4j      | Circuit breaker pattern          |
-| Bucket4j          | API rate limiting                |
-| Swagger/OpenAPI   | Interactive API documentation    |
-| Lombok            | Reduces boilerplate code         |
-| Maven             | Build & dependency management    |
-
----
-
-## 🚀 How to Run
-
-```bash
-# Clone the repository
+🚀 How to Run
+bash# Clone the repository
 git clone https://github.com/YOUR_USERNAME/banking-app.git
 cd banking-app
 
 # Run the application
 ./mvnw spring-boot:run
-```
+ResourceURLApplicationhttp://localhost:8080Swagger UI (REST)http://localhost:8080/swagger-ui.htmlGraphiQL (GraphQL)http://localhost:8080/graphiqlActuatorhttp://localhost:8080/actuatorDatabasebankingdb.db in project root
 
-- **Application:** http://localhost:8080
-- **Swagger UI:** http://localhost:8080/swagger-ui.html
-- **Database:** SQLite file stored at `bankingdb.db` in project root
-- **View data:** Use [DB Browser for SQLite](https://sqlitebrowser.org/dl/) to open `bankingdb.db`
+Data persists across restarts. Use DB Browser for SQLite to view data.
 
-> Data persists even after restarting the application.
 
----
+🔐 Authentication (JWT)
+Register
+bashcurl -X POST http://localhost:8080/api/auth/register \
+-H "Content-Type: application/json" \
+-d '{"username": "admin", "password": "admin123", "role": "ROLE_ADMIN"}'
+Login (get token)
+bashcurl -X POST http://localhost:8080/api/auth/login \
+-H "Content-Type: application/json" \
+-d '{"username": "admin", "password": "admin123"}'
+Use token
+bashcurl -X GET http://localhost:8080/api/v1/accounts \
+-H "Authorization: Bearer <your-token>"
+Role-Based Access
+RolePermissionsROLE_USERView accounts, deposit, withdraw, transfer, pay billsROLE_ADMINEverything above + delete accounts, approve/reject loans, audit logs
 
-## 🔐 Authentication
+📡 REST API Endpoints
+Authentication (Public)
+MethodEndpointDescriptionPOST/api/auth/registerRegister userPOST/api/auth/loginLogin & get token
+Accounts (v1)
+MethodEndpointDescriptionPOST/api/v1/accountsCreate accountGET/api/v1/accountsGet all accountsGET/api/v1/accounts/{id}Get account by IDPUT/api/v1/accounts/{id}/depositDeposit moneyPUT/api/v1/accounts/{id}/withdrawWithdraw moneyPOST/api/v1/accounts/transferTransfer fundsDELETE/api/v1/accounts/{id}Delete account (ADMIN)
+Accounts (v2 - Enhanced with DTOs)
+MethodEndpointDescriptionGET/api/v2/accountsAll accounts (formatted balance)GET/api/v2/accounts/{id}Account with status & formattingPOST/api/v2/accountsCreate account (DTO response)POST/api/v2/accounts/transferTransfer with validated request
+Transactions
+MethodEndpointDescriptionGET/api/v1/transactions/{accountId}All transactionsGET/api/v1/transactions/{accountId}?type=DEPOSITFilter by type
+Customers
+MethodEndpointDescriptionPOST/api/v1/customersCreate customerGET/api/v1/customersGet allGET/api/v1/customers/{id}Get by IDGET/api/v1/customers/search?name=arjunSearch by namePUT/api/v1/customers/{id}UpdateDELETE/api/v1/customers/{id}Delete
+Loans
+MethodEndpointDescriptionPOST/api/v1/loansApply for loanGET/api/v1/loansGet all loansGET/api/v1/loans/{id}Get by IDGET/api/v1/loans/account/{accId}Loans for accountGET/api/v1/loans/status/{status}Filter by statusPUT/api/v1/loans/{id}/approveApprove (ADMIN)PUT/api/v1/loans/{id}/rejectReject (ADMIN)PUT/api/v1/loans/{id}/repayRepay loan
+Bill Payments
+MethodEndpointDescriptionPOST/api/v1/bills/payPay a billGET/api/v1/bills/account/{accId}Bills for accountGET/api/v1/bills/account/{accId}?type=ELECTRICITYFilter by typeGET/api/v1/bills/track/{referenceNumber}Track by reference
+Notifications
+MethodEndpointDescriptionGET/api/v1/notifications/{accountId}AllGET/api/v1/notifications/{accountId}/unreadUnread onlyGET/api/v1/notifications/{accountId}/countUnread countPUT/api/v1/notifications/{id}/readMark one readPUT/api/v1/notifications/{accountId}/read-allMark all read
+Circuit Breaker (Public Demo)
+MethodEndpointDescriptionPOST/api/v1/circuit-breaker/paymentTest payment with CBPOST/api/v1/circuit-breaker/loan/{loanId}Test loan with CBPOST/api/v1/circuit-breaker/transferTest transfer with CBPOST/api/v1/circuit-breaker/gateway/downSimulate gateway DOWNPOST/api/v1/circuit-breaker/gateway/upSimulate gateway UPGET/api/v1/circuit-breaker/statusView CB states
+Resilience (Retry + Bulkhead + CB combined)
+MethodEndpointDescriptionPOST/api/v1/resilience/paymentPayment with all 3 patternsPOST/api/v1/resilience/transferTransfer with all 3 patternsPOST/api/v1/resilience/loan/{loanId}Loan with bulkhead + CBGET/api/v1/resilience/statusAll resilience stats
+Event Sourcing
+MethodEndpointDescriptionPOST/api/v1/events/publishPublish eventGET/api/v1/events/account/{accountId}Full event historyGET/api/v1/events/account/{accountId}/rebuildRebuild state from eventsGET/api/v1/events/account/{accountId}/at/{seq}State at specific pointGET/api/v1/events/account/{accountId}/type/{type}Events by type
+Cache
+MethodEndpointDescriptionGET/api/v1/cache/statsCache hit/missDELETE/api/v1/cache/clearClear all caches
+Audit Logs (ADMIN only)
+MethodEndpointDescriptionGET/api/v1/auditRecent 50 logsGET/api/v1/audit/user/{username}Logs by userGET/api/v1/audit/action/{action}Logs by actionGET/api/v1/audit/entity/{type}Logs by entityGET/api/v1/audit/date?start=2025-01-01&end=2025-01-31Logs by date
+Rate Limiting
+MethodEndpointDescriptionGET/api/v1/rate-limit/infoView policy
 
-This app uses **JWT (JSON Web Token)** authentication. You must register and login to access protected endpoints.
+All responses include X-Rate-Limit-Remaining header. Exceeding 20 req/min returns 429.
 
-### Step 1: Register
-```bash
-curl -X POST http://localhost:8080/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"username": "arjun", "password": "pass123", "role": "ROLE_ADMIN"}'
-```
 
-### Step 2: Login (get token)
-```bash
-curl -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username": "arjun", "password": "pass123"}'
-```
+🔮 GraphQL API
+Open http://localhost:8080/graphiql for the interactive playground.
+Why GraphQL alongside REST?
+ScenarioRESTGraphQLGet account + transactions + loans3 API calls1 queryGet only account name & balanceReturns all fieldsReturns only requestedAdd new field to responseNew API versionJust add to query
+Example Queries
+Fetch account with nested transactions & loans (1 query = 3 REST calls):
+graphql{
+accountById(id: 1) {
+accountName
+balance
+transactions {
+transactionType
+amount
+description
+}
+loans {
+loanType
+loanAmount
+status
+}
+}
+}
+Create account:
+graphqlmutation {
+createAccount(input: {
+accountName: "Arjun Don"
+accountType: "SAVINGS"
+balance: 5000
+}) {
+id
+accountNumber
+balance
+}
+}
+Transfer money:
+graphqlmutation {
+transfer(input: {
+fromAccountId: 1
+toAccountId: 2
+amount: 500
+}) {
+message
+amount
+}
+}
 
-### Step 3: Use token in all requests
-```bash
-curl -X GET http://localhost:8080/api/v1/accounts \
-  -H "Authorization: Bearer <your-token-here>"
-  
-```
+🔄 Enterprise Patterns Implemented
+1. Circuit Breaker (Resilience4j)
+   🟢 CLOSED    → Normal, requests pass through
+   🔴 OPEN      → Too many failures, fallback returned instantly
+   🟡 HALF-OPEN → Testing if service recovered
+2. Retry with Exponential Backoff
+   Attempt 1 → Fails → Wait 1s
+   Attempt 2 → Fails → Wait 2s
+   Attempt 3 → Fails → Fallback response
+3. Bulkhead Isolation
+   Payment service  → Max 10 concurrent requests
+   Loan service     → Max 5 concurrent requests
+   Transfer service → Max 15 concurrent requests
+4. Event Sourcing
+   Event 1: ACCOUNT_CREATED  → balance: 0
+   Event 2: DEPOSITED         → +5000, balance: 5000
+   Event 3: WITHDRAWN         → -500,  balance: 4500
+   Event 4: TRANSFERRED_OUT   → -1000, balance: 3500
+   → Can rebuild state at ANY point in time
+5. Caching (Caffeine)
+   1st GET /accounts/1 → Database query → Stored in cache
+   2nd GET /accounts/1 → Returned from cache instantly (no DB)
+   On update           → Cache cleared automatically
+6. API Versioning
+   GET /api/v1/accounts/1 → Raw entity response
+   GET /api/v2/accounts/1 → Enhanced DTO with formatted balance & status
 
-### Role-Based Access
+🛡️ Global Exception Handling
+All errors return a consistent JSON format:
+json{
+"status": 404,
+"error": "Not Found",
+"message": "Account not found with ID: 99",
+"path": "/api/v1/accounts/99",
+"timestamp": "2026-02-22T20:15:00"
+}
+StatusWhen400Validation errors, bad input401Invalid/expired token403No permission (wrong role)404Resource not found405Wrong HTTP method409Duplicate resource422Insufficient balance429Rate limit exceeded503External service unavailable500Unexpected server error
 
-| Role       | Permissions                                          |
-|------------|------------------------------------------------------|
-| ROLE_USER  | View accounts, deposit, withdraw, transfer, pay bills |
-| ROLE_ADMIN | Everything above + delete accounts, approve/reject loans, view audit logs |
-
----
-
-## 📡 API Endpoints
-
-### Authentication (Public - no token needed)
-
-| Method | Endpoint              | Description         |
-|--------|-----------------------|---------------------|
-| POST   | `/api/auth/register`  | Register new user   |
-| POST   | `/api/auth/login`     | Login & get token   |
-
-### Accounts
-
-| Method | Endpoint                              | Description                |
-|--------|---------------------------------------|----------------------------|
-| POST   | `/api/v1/accounts`                    | Create new account         |
-| GET    | `/api/v1/accounts`                    | Get all accounts           |
-| GET    | `/api/v1/accounts/{id}`               | Get account by ID          |
-| PUT    | `/api/v1/accounts/{id}/deposit`       | Deposit money              |
-| PUT    | `/api/v1/accounts/{id}/withdraw`      | Withdraw money             |
-| POST   | `/api/v1/accounts/transfer`           | Transfer between accounts  |
-| DELETE | `/api/v1/accounts/{id}`               | Delete account (ADMIN)     |
-
-### Transactions
-
-| Method | Endpoint                                        | Description                    |
-|--------|-------------------------------------------------|--------------------------------|
-| GET    | `/api/v1/transactions/{accountId}`              | Get all transactions           |
-| GET    | `/api/v1/transactions/{accountId}?type=DEPOSIT` | Filter by type                 |
-
-### Customers
-
-| Method | Endpoint                                  | Description              |
-|--------|-------------------------------------------|--------------------------|
-| POST   | `/api/v1/customers`                       | Create customer          |
-| GET    | `/api/v1/customers`                       | Get all customers        |
-| GET    | `/api/v1/customers/{id}`                  | Get customer by ID       |
-| GET    | `/api/v1/customers/search?name=arjun`     | Search by name           |
-| PUT    | `/api/v1/customers/{id}`                  | Update customer profile  |
-| DELETE | `/api/v1/customers/{id}`                  | Delete customer          |
-
-### Loans
-
-| Method | Endpoint                           | Description                  |
-|--------|------------------------------------|------------------------------|
-| POST   | `/api/v1/loans`                    | Apply for a loan             |
-| GET    | `/api/v1/loans`                    | Get all loans                |
-| GET    | `/api/v1/loans/{id}`               | Get loan by ID               |
-| GET    | `/api/v1/loans/account/{accId}`    | Get loans for account        |
-| GET    | `/api/v1/loans/status/{status}`    | Filter by status             |
-| PUT    | `/api/v1/loans/{id}/approve`       | Approve loan (ADMIN)         |
-| PUT    | `/api/v1/loans/{id}/reject`        | Reject loan (ADMIN)          |
-| PUT    | `/api/v1/loans/{id}/repay`         | Make a repayment             |
-
-### Bill Payments
-
-| Method | Endpoint                                             | Description                   |
-|--------|------------------------------------------------------|-------------------------------|
-| POST   | `/api/v1/bills/pay`                                  | Pay a bill                    |
-| GET    | `/api/v1/bills/account/{accId}`                      | Get all payments for account  |
-| GET    | `/api/v1/bills/account/{accId}?type=ELECTRICITY`     | Filter by bill type           |
-| GET    | `/api/v1/bills/track/{referenceNumber}`               | Track payment by reference    |
-
-### Notifications
-
-| Method | Endpoint                                       | Description              |
-|--------|-------------------------------------------------|--------------------------|
-| GET    | `/api/v1/notifications/{accountId}`             | All notifications        |
-| GET    | `/api/v1/notifications/{accountId}/unread`      | Unread only              |
-| GET    | `/api/v1/notifications/{accountId}/count`       | Unread count             |
-| PUT    | `/api/v1/notifications/{id}/read`               | Mark one as read         |
-| PUT    | `/api/v1/notifications/{accountId}/read-all`    | Mark all as read         |
-
-### Circuit Breaker (Public - demo endpoints)
-
-| Method | Endpoint                                  | Description                          |
-|--------|-------------------------------------------|--------------------------------------|
-| POST   | `/api/v1/circuit-breaker/payment`         | Test payment with circuit breaker    |
-| POST   | `/api/v1/circuit-breaker/loan/{loanId}`   | Test loan approval with fallback     |
-| POST   | `/api/v1/circuit-breaker/transfer`        | Test external transfer with fallback |
-| POST   | `/api/v1/circuit-breaker/gateway/down`    | Simulate gateway going DOWN          |
-| POST   | `/api/v1/circuit-breaker/gateway/up`      | Simulate gateway recovering          |
-| GET    | `/api/v1/circuit-breaker/gateway/status`  | Check gateway status                 |
-| GET    | `/api/v1/circuit-breaker/status`          | View all circuit breaker states      |
-
-### Audit Logs (ADMIN only)
-
-| Method | Endpoint                                               | Description          |
-|--------|--------------------------------------------------------|----------------------|
-| GET    | `/api/v1/audit`                                        | Recent 50 logs       |
-| GET    | `/api/v1/audit/user/{username}`                        | Logs by user         |
-| GET    | `/api/v1/audit/action/{action}`                        | Logs by action type  |
-| GET    | `/api/v1/audit/entity/{type}`                          | Logs by entity type  |
-| GET    | `/api/v1/audit/date?start=2025-01-01&end=2025-01-31`  | Logs by date range   |
-
-### Rate Limiting
-
-| Method | Endpoint                      | Description            |
-|--------|-------------------------------|------------------------|
-| GET    | `/api/v1/rate-limit/info`     | View rate limit policy |
-
-> All API responses include `X-Rate-Limit-Remaining` and `X-Rate-Limit-Limit` headers. Exceeding 20 requests/minute returns `429 Too Many Requests`.
-
----
-
-## 🔄 Circuit Breaker Pattern
-
-The app uses **Resilience4j** to protect against external service failures.
-
-```
-🟢 CLOSED    → Normal operation, requests pass through
-🔴 OPEN      → Too many failures, fallback response returned instantly
-🟡 HALF-OPEN → Testing if service recovered
-```
-
-**Try it:**
-1. `POST /api/v1/circuit-breaker/gateway/down` → Simulate gateway failure
-2. `POST /api/v1/circuit-breaker/payment` → Hit 5 times → See fallback activate
-3. `GET /api/v1/circuit-breaker/status` → See circuit state change to OPEN
-4. `POST /api/v1/circuit-breaker/gateway/up` → Recover gateway
-5. Wait 10 seconds → Circuit goes HALF-OPEN → CLOSED
-
----
 
 ## 📁 Project Structure
 
@@ -233,32 +185,50 @@ banking-app/
 ├── src/main/java/com/banking/app/
 │   ├── BankingAppApplication.java
 │   ├── config/
-│   │   ├── SecurityConfig.java               ← JWT + CORS + role-based access
+│   │   ├── CacheConfig.java
+|   |   ├── SecurityConfig.java               ← JWT + CORS + role-based access
 │   │   ├── SwaggerConfig.java                ← OpenAPI documentation
 │   │   ├── AuditInterceptor.java             ← Auto-logs every API request
 │   │   ├── WebConfig.java                    ← Registers interceptors
 │   │   └── RateLimitFilter.java              ← 20 req/min per IP
 │   ├── security/
-│   │   ├── JwtUtil.java                      ← Generate & validate JWT tokens
-│   │   ├── JwtAuthFilter.java                ← Checks token on every request
-│   │   └── CustomUserDetailsService.java     ← Loads user from DB
+│   │   ├── JwtUtil.java
+│   │   ├── JwtAuthFilter.java
+│   │   └── CustomUserDetailsService.java
+│   ├── graphql/
+│   │   ├── QueryResolver.java
+│   │   └── MutationResolver.java
 │   ├── controller/
 │   │   ├── AccountController.java
+│   │   ├── AccountControllerV2.java
 │   │   ├── AuditLogController.java
 │   │   ├── AuthController.java
 │   │   ├── BillPaymentController.java
+│   │   ├── CacheController.java
 │   │   ├── CircuitBreakerController.java
 │   │   ├── CustomerController.java
+│   │   ├── EventSourcingController.java
 │   │   ├── LoanController.java
 │   │   ├── NotificationController.java
 │   │   ├── RateLimitController.java
+│   │   ├── ResilienceController.java
 │   │   └── TransactionController.java
+│   ├── dto/
+│   │   ├── ApiError.java
+│   │   ├── AccountResponseV2.java
+│   │   └── TransferRequestV2.java
 │   ├── exception/
 │   │   ├── AccountNotFoundException.java
+│   │   ├── BadRequestException.java
+│   │   ├── DuplicateResourceException.java
 │   │   ├── GlobalExceptionHandler.java
-│   │   └── InsufficientBalanceException.java
+│   │   ├── InsufficientBalanceException.java
+│   │   ├── ResourceNotFoundException.java
+│   │   ├── ServiceUnavailableException.java
+│   │   └── UnauthorizedException.java
 │   ├── model/
 │   │   ├── Account.java
+│   │   ├── AccountEvent.java
 │   │   ├── AuditLog.java
 │   │   ├── BillPayment.java
 │   │   ├── Customer.java
@@ -267,6 +237,7 @@ banking-app/
 │   │   ├── Transaction.java
 │   │   └── User.java
 │   ├── repository/
+│   │   ├── AccountEventRepository.java
 │   │   ├── AccountRepository.java
 │   │   ├── AuditLogRepository.java
 │   │   ├── BillPaymentRepository.java
@@ -282,12 +253,16 @@ banking-app/
 │       ├── BillPaymentService.java
 │       ├── CircuitBreakerService.java
 │       ├── CustomerService.java
+│       ├── EventSourcingService.java
 │       ├── LoanService.java
 │       ├── NotificationService.java
 │       ├── PaymentGatewayService.java
+│       ├── ResilienceService.java
 │       └── TransactionService.java
 └── src/main/resources/
-    └── application.properties
+    ├── application.properties
+    └── graphql/
+        └── schema.graphqls
 ```
 
 ---
