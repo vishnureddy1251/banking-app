@@ -91,3 +91,21 @@ type BillPayment {
     status: String!
     paidAt: String
 }
+
+type Notification {
+    id: ID!
+    accountId: Long!
+    title: String!
+    message: String!
+    channel: String
+    category: String
+    isRead: Boolean!
+    createdAt: String
+}
+
+type TransferResult {
+    message: String!
+    fromAccountId: ID!
+    toAccountId: ID!
+    amount: Float!
+}
