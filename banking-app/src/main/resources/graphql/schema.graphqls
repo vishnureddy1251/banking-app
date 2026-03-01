@@ -140,3 +140,13 @@ input ApplyLoanInput {
     interestRate: Float!
     tenureMonths: Int!
 }
+
+input PayBillInput {
+    accountId: ID!
+    billType: String!
+    providerName: String
+    consumerNumber: String
+    amount: Float!
+}
+
+scalar Long
