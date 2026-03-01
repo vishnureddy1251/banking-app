@@ -55,3 +55,39 @@ type Customer {
     state: String
     zipCode: String
 }
+
+type Transaction {
+    id: ID!
+    accountId: Long!
+    transactionType: String!
+    amount: Float!
+    balanceAfter: Float!
+    relatedAccountId: Long
+    description: String
+    transactionDate: String
+}
+
+type Loan {
+    id: ID!
+    accountId: Long!
+    loanType: String!
+    loanAmount: Float!
+    amountPaid: Float
+    remainingBalance: Float
+    interestRate: Float!
+    tenureMonths: Int!
+    status: String!
+    createdAt: String
+}
+
+type BillPayment {
+    id: ID!
+    accountId: Long!
+    billType: String!
+    providerName: String
+    consumerNumber: String
+    amount: Float!
+    referenceNumber: String
+    status: String!
+    paidAt: String
+}
