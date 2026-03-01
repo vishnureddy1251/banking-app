@@ -15,3 +15,43 @@ type Query {
     unreadCount(accountId: ID!): Int!
     billsByAccount(accountId: ID!): [BillPayment!]!
 }
+
+type Mutation {
+    createAccount(input: CreateAccountInput!): Account!
+    deposit(accountId: ID!, amount: Float!): Account!
+    withdraw(accountId: ID!, amount: Float!): Account!
+    transfer(input: TransferInput!): TransferResult!
+    deleteAccount(id: ID!): String!
+    createCustomer(input: CreateCustomerInput!): Customer!
+    applyLoan(input: ApplyLoanInput!): Loan!
+    approveLoan(id: ID!): Loan!
+    rejectLoan(id: ID!): Loan!
+    repayLoan(id: ID!, amount: Float!): Loan!
+    payBill(input: PayBillInput!): BillPayment!
+    markAsRead(id: ID!): Notification!
+    markAllAsRead(accountId: ID!): String!
+}
+
+type Account {
+    id: ID!
+    accountName: String!
+    accountNumber: String
+    accountType: String!
+    balance: Float!
+    createdAt: String
+    updatedAt: String
+    transactions: [Transaction!]
+    loans: [Loan!]
+}
+
+type Customer {
+    id: ID!
+    firstName: String!
+    lastName: String!
+    email: String!
+    phone: String
+    address: String
+    city: String
+    state: String
+    zipCode: String
+}
