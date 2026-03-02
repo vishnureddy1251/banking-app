@@ -117,4 +117,27 @@ public class QueryResolver {
         log.info("GraphQL: Fetching loans by status {}", status);
         return loanRepository.findByStatus(status);
     }
+
+    @QueryMapping
+    public List<Notification> notificationsByAccount(@Argument Long accountId) {
+        log.info("GraphQL: Fetching notifications for account {}", accountId);
+        return notificationRepository.findByAccountIdOrderByCreatedAtDesc(accountId);
+    }
+
+    @QueryMapping
+    public List<Notification> unreadNotifications(@Argument Long accountId) {
+        log.info("GraphQL: Fetching unread notifications for account {}", accountId);
+        return notificationRepository.findByAccountIdAndIsReadFalseOrderByCreatedAtDesc(accountId);
+    }
+
+    @QueryMapping
+    public long unreadCount(@Argument Long accountId) {
+        return notificationRepository.countByAccountIdAndIsReadFalse(accountId);
+    }
+
+    @QueryMapping
+    public List<BillPayment> billsByAccount(@Argument Long accountId) {
+        log.info("GraphQL: Fetching bills for account {}", accountId);
+        return billPaymentRepository.findByAccountIdOrderByPaymentDateDesc(accountId);
+    }
 }
