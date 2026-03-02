@@ -58,18 +58,18 @@ type Customer {
 
 type Transaction {
     id: ID!
-    accountId: Long!
+    accountId: ID!
     transactionType: String!
     amount: Float!
     balanceAfter: Float!
-    relatedAccountId: Long
+    relatedAccountId: ID
     description: String
     transactionDate: String
 }
 
 type Loan {
     id: ID!
-    accountId: Long!
+    accountId: ID!
     loanType: String!
     loanAmount: Float!
     amountPaid: Float
@@ -82,7 +82,7 @@ type Loan {
 
 type BillPayment {
     id: ID!
-    accountId: Long!
+    accountId: ID!
     billType: String!
     providerName: String
     consumerNumber: String
@@ -94,7 +94,7 @@ type BillPayment {
 
 type Notification {
     id: ID!
-    accountId: Long!
+    accountId: ID!
     title: String!
     message: String!
     channel: String
@@ -148,5 +148,3 @@ input PayBillInput {
     consumerNumber: String
     amount: Float!
 }
-
-scalar Long
