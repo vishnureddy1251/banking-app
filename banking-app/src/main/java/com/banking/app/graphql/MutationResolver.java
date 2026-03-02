@@ -136,4 +136,17 @@ public class MutationResolver {
 
         return billPaymentService.payBill(bill);
     }
+
+    @MutationMapping
+    public Notification markAsRead(@Argument Long id) {
+        log.info("GraphQL: Marking notification {} as read", id);
+        return notificationService.markAsRead(id);
+    }
+
+    @MutationMapping
+    public String markAllAsRead(@Argument Long accountId) {
+        log.info("GraphQL: Marking all notifications as read for account {}", accountId);
+        notificationService.markAllAsRead(accountId);
+        return "All notifications marked as read for account " + accountId;
+    }
 }
