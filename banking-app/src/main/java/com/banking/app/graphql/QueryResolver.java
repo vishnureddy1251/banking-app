@@ -61,4 +61,23 @@ public class QueryResolver {
         log.info("GraphQL: Loading loans for account {}", account.getId());
         return loanRepository.findByAccountId(account.getId());
     }
+
+    @QueryMapping
+    public List<Customer> allCustomers() {
+        log.info("GraphQL: Fetching all customers");
+        return customerRepository.findAll();
+    }
+
+    @QueryMapping
+    public Customer customerById(@Argument Long id) {
+        log.info("GraphQL: Fetching customer {}", id);
+        return customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found: " + id));
+    }
+
+    @QueryMapping
+    public List<Customer> searchCustomers(@Argument String name) {
+        log.info("GraphQL: Searching customers by name: {}", name);
+        return customerRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(name, name);
+    }
 }
