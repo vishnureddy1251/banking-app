@@ -121,4 +121,19 @@ public class MutationResolver {
         log.info("GraphQL: Repaying {} on loan {}", amount, id);
         return loanService.repayLoan(id, BigDecimal.valueOf(amount));
     }
+
+    @MutationMapping
+    public BillPayment payBill(@Argument Map<String, Object> input) {
+        Long accountId = Long.valueOf(input.get("accountId").toString());
+        log.info("GraphQL: Paying bill for account {}", accountId);
+
+        BillPayment bill = new BillPayment();
+        bill.setAccountId(accountId);
+        bill.setBillType((String) input.get("billType"));
+        bill.setProviderName((String) input.get("providerName"));
+        bill.setConsumerNumber((String) input.get("consumerNumber"));
+        bill.setAmount(new BigDecimal(input.get("amount").toString()));
+
+        return billPaymentService.payBill(bill);
+    }
 }
