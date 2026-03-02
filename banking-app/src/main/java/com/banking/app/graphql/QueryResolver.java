@@ -80,4 +80,41 @@ public class QueryResolver {
         log.info("GraphQL: Searching customers by name: {}", name);
         return customerRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(name, name);
     }
+
+    @QueryMapping
+    public List<Transaction> transactionsByAccount(@Argument Long accountId) {
+        log.info("GraphQL: Fetching transactions for account {}", accountId);
+        return transactionRepository.findByAccountIdOrderByTransactionDateDesc(accountId);
+    }
+
+    @QueryMapping
+    public List<Transaction> transactionsByType(@Argument Long accountId, @Argument String type) {
+        log.info("GraphQL: Fetching {} transactions for account {}", type, accountId);
+        return transactionRepository.findByAccountIdAndTransactionType(accountId, type);
+    }
+
+    @QueryMapping
+    public List<Loan> allLoans() {
+        log.info("GraphQL: Fetching all loans");
+        return loanRepository.findAll();
+    }
+
+    @QueryMapping
+    public Loan loanById(@Argument Long id) {
+        log.info("GraphQL: Fetching loan {}", id);
+        return loanRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Loan not found: " + id));
+    }
+
+    @QueryMapping
+    public List<Loan> loansByAccount(@Argument Long accountId) {
+        log.info("GraphQL: Fetching loans for account {}", accountId);
+        return loanRepository.findByAccountId(accountId);
+    }
+
+    @QueryMapping
+    public List<Loan> loansByStatus(@Argument String status) {
+        log.info("GraphQL: Fetching loans by status {}", status);
+        return loanRepository.findByStatus(status);
+    }
 }
