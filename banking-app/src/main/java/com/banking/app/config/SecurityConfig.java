@@ -40,6 +40,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/ws-test.html").permitAll()
+                        .requestMatchers("/api/v1/ws-test/**").permitAll()
                         .requestMatchers("/graphql/**").permitAll()
                         .requestMatchers("/graphiql/**").permitAll()
 
