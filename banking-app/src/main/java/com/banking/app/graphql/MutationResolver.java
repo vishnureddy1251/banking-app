@@ -1,7 +1,6 @@
 package com.banking.app.graphql;
 
-import com.banking.app.model.Account;
-import com.banking.app.model.Customer;
+import com.banking.app.model.*;
 import com.banking.app.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,5 +87,38 @@ public class MutationResolver {
         customer.setZipCode((String) input.get("zipCode"));
 
         return customerService.createCustomer(customer);
+    }
+
+    @MutationMapping
+    public Loan applyLoan(@Argument Map<String, Object> input) {
+        Long accountId = Long.valueOf(input.get("accountId").toString());
+        log.info("GraphQL: Applying loan for account {}", accountId);
+
+        Loan loan = new Loan();
+        loan.setAccountId(accountId);
+        loan.setLoanType((String) input.get("loanType"));
+        loan.setLoanAmount(new BigDecimal(input.get("loanAmount").toString()));
+        loan.setInterestRate(new BigDecimal(input.get("interestRate").toString()));
+        loan.setTenureMonths(Integer.parseInt(input.get("tenureMonths").toString()));
+
+        return loanService.applyForLoan(loan);
+    }
+
+    @MutationMapping
+    public Loan approveLoan(@Argument Long id) {
+        log.info("GraphQL: Approving loan {}", id);
+        return loanService.approveLoan(id);
+    }
+
+    @MutationMapping
+    public Loan rejectLoan(@Argument Long id) {
+        log.info("GraphQL: Rejecting loan {}", id);
+        return loanService.rejectLoan(id);
+    }
+
+    @MutationMapping
+    public Loan repayLoan(@Argument Long id, @Argument Double amount) {
+        log.info("GraphQL: Repaying {} on loan {}", amount, id);
+        return loanService.repayLoan(id, BigDecimal.valueOf(amount));
     }
 }
