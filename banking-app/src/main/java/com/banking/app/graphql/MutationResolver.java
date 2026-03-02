@@ -1,6 +1,7 @@
 package com.banking.app.graphql;
 
 import com.banking.app.model.Account;
+import com.banking.app.model.Customer;
 import com.banking.app.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,5 +71,22 @@ public class MutationResolver {
         log.info("GraphQL: Deleting account {}", id);
         accountService.deleteAccount(id);
         return "Account " + id + " deleted successfully";
+    }
+
+    @MutationMapping
+    public Customer createCustomer(@Argument Map<String, Object> input) {
+        log.info("GraphQL: Creating customer {}", input.get("firstName"));
+
+        Customer customer = new Customer();
+        customer.setFirstName((String) input.get("firstName"));
+        customer.setLastName((String) input.get("lastName"));
+        customer.setEmail((String) input.get("email"));
+        customer.setPhone((String) input.get("phone"));
+        customer.setAddress((String) input.get("address"));
+        customer.setCity((String) input.get("city"));
+        customer.setState((String) input.get("state"));
+        customer.setZipCode((String) input.get("zipCode"));
+
+        return customerService.createCustomer(customer);
     }
 }
