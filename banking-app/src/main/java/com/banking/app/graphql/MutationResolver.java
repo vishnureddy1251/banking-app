@@ -35,4 +35,40 @@ public class MutationResolver {
 
         return accountService.createAccount(account);
     }
+
+    @MutationMapping
+    public Account deposit(@Argument Long accountId, @Argument Double amount) {
+        log.info("GraphQL: Depositing {} to account {}", amount, accountId);
+        return accountService.deposit(accountId, BigDecimal.valueOf(amount));
+    }
+
+    @MutationMapping
+    public Account withdraw(@Argument Long accountId, @Argument Double amount) {
+        log.info("GraphQL: Withdrawing {} from account {}", amount, accountId);
+        return accountService.withdraw(accountId, BigDecimal.valueOf(amount));
+    }
+
+    @MutationMapping
+    public Map<String, Object> transfer(@Argument Map<String, Object> input) {
+        Long fromId = Long.valueOf(input.get("fromAccountId").toString());
+        Long toId = Long.valueOf(input.get("toAccountId").toString());
+        BigDecimal amount = new BigDecimal(input.get("amount").toString());
+
+        log.info("GraphQL: Transferring {} from {} to {}", amount, fromId, toId);
+        String result = accountService.transfer(fromId, toId, amount);
+
+        return Map.of(
+                "message", result,
+                "fromAccountId", fromId,
+                "toAccountId", toId,
+                "amount", amount.doubleValue()
+        );
+    }
+
+    @MutationMapping
+    public String deleteAccount(@Argument Long id) {
+        log.info("GraphQL: Deleting account {}", id);
+        accountService.deleteAccount(id);
+        return "Account " + id + " deleted successfully";
+    }
 }
