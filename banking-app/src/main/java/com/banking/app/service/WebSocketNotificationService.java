@@ -80,6 +80,35 @@ public class WebSocketNotificationService {
         log.info("WebSocket: Transfer received notification to account {}", toAccountId);
     }
 
+    public void notifyLoanApproved(Long accountId, Long loanId, BigDecimal loanAmount) {
+        Map<String, Object> payload = Map.of(
+                "type", "LOAN_APPROVED",
+                "title", "Loan Approved!",
+                "message", "Your loan #" + loanId + " of $" + loanAmount + " has been approved!",
+                "loanId", loanId,
+                "amount", loanAmount.toString(),
+                "accountId", accountId,
+                "timestamp", LocalDateTime.now().toString()
+        );
+
+        sendToAccount(accountId, payload);
+        log.info("WebSocket: Loan approved notification to account {}", accountId);
+    }
+
+    public void notifyLoanRejected(Long accountId, Long loanId) {
+        Map<String, Object> payload = Map.of(
+                "type", "LOAN_REJECTED",
+                "title", "Loan Rejected",
+                "message", "Your loan #" + loanId + " has been rejected.",
+                "loanId", loanId,
+                "accountId", accountId,
+                "timestamp", LocalDateTime.now().toString()
+        );
+
+        sendToAccount(accountId, payload);
+        log.info("WebSocket: Loan rejected notification to account {}", accountId);
+    }
+
     private void sendToAccount(Long accountId, Map<String, Object> payload) {
         messagingTemplate.convertAndSend("/topic/notifications/" + accountId, payload);
     }
