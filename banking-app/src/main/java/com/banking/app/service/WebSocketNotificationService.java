@@ -109,6 +109,23 @@ public class WebSocketNotificationService {
         log.info("WebSocket: Loan rejected notification to account {}", accountId);
     }
 
+    public void notifyBillPaid(Long accountId, String billType, BigDecimal amount,
+                               String referenceNumber) {
+        Map<String, Object> payload = Map.of(
+                "type", "BILL_PAID",
+                "title", "Bill Payment Successful",
+                "message", billType + " bill of $" + amount + " paid successfully. Ref: " + referenceNumber,
+                "billType", billType,
+                "amount", amount.toString(),
+                "referenceNumber", referenceNumber,
+                "accountId", accountId,
+                "timestamp", LocalDateTime.now().toString()
+        );
+
+        sendToAccount(accountId, payload);
+        log.info("WebSocket: Bill payment notification to account {}", accountId);
+    }
+
     private void sendToAccount(Long accountId, Map<String, Object> payload) {
         messagingTemplate.convertAndSend("/topic/notifications/" + accountId, payload);
     }
