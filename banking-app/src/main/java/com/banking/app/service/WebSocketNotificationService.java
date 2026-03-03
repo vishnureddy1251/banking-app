@@ -140,6 +140,18 @@ public class WebSocketNotificationService {
         log.info("WebSocket: Low balance alert to account {}", accountId);
     }
 
+    public void broadcastSystemMessage(String title, String message) {
+        Map<String, Object> payload = Map.of(
+                "type", "SYSTEM",
+                "title", title,
+                "message", message,
+                "timestamp", LocalDateTime.now().toString()
+        );
+
+        messagingTemplate.convertAndSend("/topic/system", payload);
+        log.info("WebSocket: System broadcast sent - {}", title);
+    }
+
     private void sendToAccount(Long accountId, Map<String, Object> payload) {
         messagingTemplate.convertAndSend("/topic/notifications/" + accountId, payload);
     }
