@@ -79,4 +79,8 @@ public class WebSocketNotificationService {
         sendToAccount(toAccountId, payload);
         log.info("WebSocket: Transfer received notification to account {}", toAccountId);
     }
+
+    private void sendToAccount(Long accountId, Map<String, Object> payload) {
+        messagingTemplate.convertAndSend("/topic/notifications/" + accountId, payload);
+    }
 }
