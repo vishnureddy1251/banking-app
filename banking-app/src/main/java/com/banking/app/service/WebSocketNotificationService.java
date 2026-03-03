@@ -126,6 +126,20 @@ public class WebSocketNotificationService {
         log.info("WebSocket: Bill payment notification to account {}", accountId);
     }
 
+    public void notifyLowBalance(Long accountId, BigDecimal currentBalance) {
+        Map<String, Object> payload = Map.of(
+                "type", "LOW_BALANCE",
+                "title", "Low Balance Alert!",
+                "message", "Your account balance is low: $" + currentBalance,
+                "currentBalance", currentBalance.toString(),
+                "accountId", accountId,
+                "timestamp", LocalDateTime.now().toString()
+        );
+
+        sendToAccount(accountId, payload);
+        log.info("WebSocket: Low balance alert to account {}", accountId);
+    }
+
     private void sendToAccount(Long accountId, Map<String, Object> payload) {
         messagingTemplate.convertAndSend("/topic/notifications/" + accountId, payload);
     }
