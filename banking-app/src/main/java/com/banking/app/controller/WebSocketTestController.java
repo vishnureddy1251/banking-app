@@ -53,4 +53,13 @@ public class WebSocketTestController {
         wsService.notifyLowBalance(accountId, balance);
         return ResponseEntity.ok(Map.of("message", "Low balance alert sent to account " + accountId));
     }
+
+    @PostMapping("/broadcast")
+    public ResponseEntity<Map<String, String>> testBroadcast(@RequestBody Map<String, Object> request) {
+        String title = request.get("title").toString();
+        String message = request.get("message").toString();
+
+        wsService.broadcastSystemMessage(title, message);
+        return ResponseEntity.ok(Map.of("message", "System broadcast sent to all users"));
+    }
 }
