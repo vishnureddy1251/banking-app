@@ -19,6 +19,7 @@ public class LoanService {
 
     private final LoanRepository loanRepository;
     private final AccountService accountService;
+    private final WebSocketNotificationService wsNotificationService;
 
     @Transactional
     public Loan applyForLoan(Loan loan) {
@@ -48,6 +49,7 @@ public class LoanService {
         accountService.deposit(loan.getAccountId(), loan.getLoanAmount());
 
         log.info("Loan approved: ID {} - ${} deposited to account {}", loanId, loan.getLoanAmount(), loan.getAccountId());
+        wsNotificationService.notifyLoanApproved(loan.getAccountId(), loanId, loan.getLoanAmount());
         return saved;
     }
 
@@ -62,6 +64,7 @@ public class LoanService {
         loan.setStatus("REJECTED");
         Loan saved = loanRepository.save(loan);
         log.info("Loan rejected: ID {}", loanId);
+        wsNotificationService.notifyLoanRejected(loan.getAccountId(), loanId);
         return saved;
     }
 
