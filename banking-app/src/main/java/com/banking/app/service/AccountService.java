@@ -22,6 +22,7 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
     private final TransactionService transactionService;
+    private final WebSocketNotificationService wsNotificationService;
 
     @Transactional
     @CacheEvict(value = {"accounts", "allAccounts"}, allEntries = true)
@@ -64,6 +65,11 @@ public class AccountService {
         transactionService.logTransaction(accountId, "DEPOSIT", amount, newBalance, null, "Cash deposit");
 
         log.info("Deposited {} to account {}. New balance: {}", amount, account.getAccountNumber(), newBalance);
+
+        wsNotificationService.notifyDeposit(accountId, amount, newBalance);
+        if (newBalance.compareTo(new BigDecimal("500")) < 0) {
+            wsNotificationService.notifyLowBalance(accountId, newBalance);
+        }
         return updated;
     }
 
@@ -86,6 +92,11 @@ public class AccountService {
         transactionService.logTransaction(accountId, "WITHDRAW", amount, newBalance, null, "Cash withdrawal");
 
         log.info("Withdrawn {} from account {}. New balance: {}", amount, account.getAccountNumber(), newBalance);
+
+        wsNotificationService.notifyWithdrawal(accountId, amount, newBalance);
+        if (newBalance.compareTo(new BigDecimal("500")) < 0) {
+            wsNotificationService.notifyLowBalance(accountId, newBalance);
+        }
         return updated;
     }
 
@@ -119,6 +130,12 @@ public class AccountService {
                 fromAccountId, "Transfer from account #" + fromAccountId);
 
         log.info("Transferred {} from account ID {} to account ID {}", amount, fromAccountId, toAccountId);
+
+        wsNotificationService.notifyTransferSent(fromAccountId, toAccountId, amount, fromNewBalance);
+        wsNotificationService.notifyTransferReceived(toAccountId, fromAccountId, amount, toNewBalance);
+        if (fromNewBalance.compareTo(new BigDecimal("500")) < 0) {
+            wsNotificationService.notifyLowBalance(fromAccountId, fromNewBalance);
+        }
         return "Successfully transferred " + amount + " from account " + fromAccountId + " to account " + toAccountId;
     }
 
