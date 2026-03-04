@@ -44,4 +44,13 @@ public class WebSocketTestController {
         wsService.notifyLoanApproved(accountId, loanId, amount);
         return ResponseEntity.ok(Map.of("message", "Loan approved notification sent"));
     }
+
+    @PostMapping("/low-balance")
+    public ResponseEntity<Map<String, String>> testLowBalance(@RequestBody Map<String, Object> request) {
+        Long accountId = Long.valueOf(request.get("accountId").toString());
+        BigDecimal balance = new BigDecimal(request.get("balance").toString());
+
+        wsService.notifyLowBalance(accountId, balance);
+        return ResponseEntity.ok(Map.of("message", "Low balance alert sent to account " + accountId));
+    }
 }
