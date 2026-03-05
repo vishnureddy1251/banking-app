@@ -5,18 +5,16 @@ import com.banking.app.repository.AccountRepository;
 import com.banking.app.service.AccountService;
 import com.banking.app.service.TransactionService;
 import com.banking.app.service.WebSocketNotificationService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
-
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AccountService Tests")
@@ -53,6 +51,7 @@ public class AccountServiceTest {
         @Test
         @DisplayName("Should create account successfully with balance")
         void shouldCreateAccountWithBalance() {
+
             Account newAccount = new Account();
             newAccount.setAccountName("New User");
             newAccount.setAccountType("SAVINGS");
@@ -68,4 +67,42 @@ public class AccountServiceTest {
             assertThat(result.getAccountNumber()).startsWith("ACC");
             verify(accountRepository, times(1)).save(any(Account.class));
         }
+
+        @Test
+        @DisplayName("Should create account with zero balance when balance is null")
+        void shouldCreateAccountWithZeroBalanceWhenNull() {
+
+            Account newAccount = new Account();
+            newAccount.setAccountName("Zero Balance User");
+            newAccount.setAccountType("SAVINGS");
+            newAccount.setBalance(null);
+
+            when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> {
+                Account saved = invocation.getArgument(0);
+                return saved;
+            });
+
+            Account result = accountService.createAccount(newAccount);
+
+            assertThat(result.getBalance()).isEqualTo(BigDecimal.ZERO);
+        }
+
+        @Test
+        @DisplayName("Should generate unique account number starting with ACC")
+        void shouldGenerateUniqueAccountNumber() {
+
+            Account newAccount = new Account();
+            newAccount.setAccountName("Test User");
+            newAccount.setAccountType("SAVINGS");
+            newAccount.setBalance(new BigDecimal("500.00"));
+
+            when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            Account result = accountService.createAccount(newAccount);
+
+            assertThat(result.getAccountNumber()).isNotNull();
+            assertThat(result.getAccountNumber()).startsWith("ACC");
+            assertThat(result.getAccountNumber()).hasSize(11);
+        }
+    }
 }
