@@ -252,5 +252,33 @@ public class AccountServiceTest {
                     .isInstanceOf(InsufficientBalanceException.class)
                     .hasMessageContaining("Insufficient");
         }
+
+        @Test
+        @DisplayName("Should withdraw entire balance successfully")
+        void shouldWithdrawEntireBalance() {
+
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            Account result = accountService.withdraw(1L, new BigDecimal("5000.00"));
+
+            assertThat(result.getBalance()).isEqualByComparingTo(BigDecimal.ZERO);
+        }
+
+        @Test
+        @DisplayName("Should throw exception for zero withdrawal amount")
+        void shouldThrowExceptionForZeroWithdrawal() {
+
+            assertThatThrownBy(() -> accountService.withdraw(1L, BigDecimal.ZERO))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
+
+        @Test
+        @DisplayName("Should throw exception for negative withdrawal amount")
+        void shouldThrowExceptionForNegativeWithdrawal() {
+
+            assertThatThrownBy(() -> accountService.withdraw(1L, new BigDecimal("-100")))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
     }
 }
