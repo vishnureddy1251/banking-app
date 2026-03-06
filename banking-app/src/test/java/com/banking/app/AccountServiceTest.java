@@ -162,4 +162,34 @@ public class AccountServiceTest {
             assertThat(result).isEmpty();
         }
     }
+
+    @Nested
+    @DisplayName("Deposit")
+    class DepositTests {
+
+        @Test
+        @DisplayName("Should deposit money successfully")
+        void shouldDepositSuccessfully() {
+
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            Account result = accountService.deposit(1L, new BigDecimal("2000.00"));
+
+            assertThat(result.getBalance()).isEqualByComparingTo(new BigDecimal("7000.00"));
+            verify(transactionService, times(1)).logTransaction(
+                    eq(1L), eq("DEPOSIT"), any(BigDecimal.class),
+                    any(BigDecimal.class), isNull(), anyString());
+        }
+
+        @Test
+        @DisplayName("Should throw exception for zero deposit amount")
+        void shouldThrowExceptionForZeroDeposit() {
+
+            assertThatThrownBy(() -> accountService.deposit(1L, BigDecimal.ZERO))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("positive");
+        }
+
+    }
 }
