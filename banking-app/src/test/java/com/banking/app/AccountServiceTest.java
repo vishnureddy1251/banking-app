@@ -209,5 +209,19 @@ public class AccountServiceTest {
             assertThatThrownBy(() -> accountService.deposit(99L, new BigDecimal("1000")))
                     .isInstanceOf(AccountNotFoundException.class);
         }
+
+        @Test
+        @DisplayName("Should log transaction after successful deposit")
+        void shouldLogTransactionAfterDeposit() {
+
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            accountService.deposit(1L, new BigDecimal("1000"));
+
+            verify(transactionService, times(1)).logTransaction(
+                    eq(1L), eq("DEPOSIT"), eq(new BigDecimal("1000")),
+                    eq(new BigDecimal("6000.00")), isNull(), eq("Cash deposit"));
+        }
     }
 }
