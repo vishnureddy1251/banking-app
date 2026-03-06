@@ -1,5 +1,6 @@
 package com.banking.app;
 
+import com.banking.app.exception.AccountNotFoundException;
 import com.banking.app.model.Account;
 import com.banking.app.repository.AccountRepository;
 import com.banking.app.service.AccountService;
@@ -15,6 +16,9 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AccountService Tests")
@@ -103,6 +107,59 @@ public class AccountServiceTest {
             assertThat(result.getAccountNumber()).isNotNull();
             assertThat(result.getAccountNumber()).startsWith("ACC");
             assertThat(result.getAccountNumber()).hasSize(11);
+        }
+    }
+
+    @Nested
+    @DisplayName("Get Account")
+    class GetAccountTests {
+
+        @Test
+        @DisplayName("Should return account when ID exists")
+        void shouldReturnAccountWhenIdExists() {
+
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+
+            Account result = accountService.getAccountById(1L);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getId()).isEqualTo(1L);
+            assertThat(result.getAccountName()).isEqualTo("Arjun Don");
+            assertThat(result.getBalance()).isEqualByComparingTo(new BigDecimal("5000.00"));
+        }
+
+        @Test
+        @DisplayName("Should throw AccountNotFoundException when ID does not exist")
+        void shouldThrowExceptionWhenAccountNotFound() {
+
+            when(accountRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> accountService.getAccountById(99L))
+                    .isInstanceOf(AccountNotFoundException.class)
+                    .hasMessageContaining("99");
+        }
+
+        @Test
+        @DisplayName("Should return all accounts")
+        void shouldReturnAllAccounts() {
+
+            when(accountRepository.findAll()).thenReturn(Arrays.asList(testAccount));
+
+            List<Account> result = accountService.getAllAccounts();
+
+            assertThat(result).hasSize(2);
+            assertThat(result.get(0).getAccountName()).isEqualTo("Arjun Don");
+        }
+
+        @Test
+        @DisplayName("Should return empty list when no accounts exist")
+        void shouldReturnEmptyListWhenNoAccounts() {
+
+            when(accountRepository.findAll()).thenReturn(List.of());
+
+            List<Account> result = accountService.getAllAccounts();
+
+            assertThat(result).isEmpty();
         }
     }
 }
