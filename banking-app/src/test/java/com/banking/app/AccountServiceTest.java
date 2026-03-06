@@ -1,6 +1,7 @@
 package com.banking.app;
 
 import com.banking.app.exception.AccountNotFoundException;
+import com.banking.app.exception.InsufficientBalanceException;
 import com.banking.app.model.Account;
 import com.banking.app.repository.AccountRepository;
 import com.banking.app.service.AccountService;
@@ -239,6 +240,17 @@ public class AccountServiceTest {
             Account result = accountService.withdraw(1L, new BigDecimal("1000.00"));
 
             assertThat(result.getBalance()).isEqualByComparingTo(new BigDecimal("4000.00"));
+        }
+
+        @Test
+        @DisplayName("Should throw InsufficientBalanceException when balance is low")
+        void shouldThrowExceptionForInsufficientBalance() {
+
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+
+            assertThatThrownBy(() -> accountService.withdraw(1L, new BigDecimal("6000.00")))
+                    .isInstanceOf(InsufficientBalanceException.class)
+                    .hasMessageContaining("Insufficient");
         }
     }
 }
