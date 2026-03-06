@@ -191,5 +191,23 @@ public class AccountServiceTest {
                     .hasMessageContaining("positive");
         }
 
+        @Test
+        @DisplayName("Should throw exception for negative deposit amount")
+        void shouldThrowExceptionForNegativeDeposit() {
+
+            assertThatThrownBy(() -> accountService.deposit(1L, new BigDecimal("-500")))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("positive");
+        }
+
+        @Test
+        @DisplayName("Should throw exception when account not found for deposit")
+        void shouldThrowExceptionWhenAccountNotFoundForDeposit() {
+
+            when(accountRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> accountService.deposit(99L, new BigDecimal("1000")))
+                    .isInstanceOf(AccountNotFoundException.class);
+        }
     }
 }
