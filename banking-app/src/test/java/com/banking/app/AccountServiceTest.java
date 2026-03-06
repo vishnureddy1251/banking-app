@@ -224,4 +224,21 @@ public class AccountServiceTest {
                     eq(new BigDecimal("6000.00")), isNull(), eq("Cash deposit"));
         }
     }
+
+    @Nested
+    @DisplayName("Withdraw")
+    class WithdrawTests {
+
+        @Test
+        @DisplayName("Should withdraw money successfully")
+        void shouldWithdrawSuccessfully() {
+
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            Account result = accountService.withdraw(1L, new BigDecimal("1000.00"));
+
+            assertThat(result.getBalance()).isEqualByComparingTo(new BigDecimal("4000.00"));
+        }
+    }
 }
