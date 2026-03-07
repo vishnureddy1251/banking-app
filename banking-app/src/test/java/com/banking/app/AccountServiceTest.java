@@ -318,6 +318,17 @@ public class AccountServiceTest {
             assertThatThrownBy(() -> accountService.transfer(99L, 2L, new BigDecimal("100")))
                     .isInstanceOf(AccountNotFoundException.class);
         }
+
+        @Test
+        @DisplayName("Should throw exception when destination account not found")
+        void shouldThrowExceptionWhenDestinationAccountNotFound() {
+
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            when(accountRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> accountService.transfer(1L, 99L, new BigDecimal("100")))
+                    .isInstanceOf(AccountNotFoundException.class);
+        }
     }
 
     @Nested
