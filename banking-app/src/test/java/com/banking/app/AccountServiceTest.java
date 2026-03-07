@@ -361,6 +361,18 @@ public class AccountServiceTest {
                     eq(2L), eq("TRANSFER_IN"), any(), any(), eq(1L), anyString());
         }
 
+        @Test
+        @DisplayName("Should save both accounts after transfer")
+        void shouldSaveBothAccounts() {
+
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            accountService.transfer(1L, 2L, new BigDecimal("1000.00"));
+
+            verify(accountRepository, times(2)).save(any(Account.class));
+        }
+
     }
 
     @Nested
