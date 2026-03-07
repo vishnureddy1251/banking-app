@@ -345,6 +345,22 @@ public class AccountServiceTest {
             assertThatThrownBy(() -> accountService.transfer(1L, 2L, new BigDecimal("-500")))
                     .isInstanceOf(IllegalArgumentException.class);
         }
+        
+        @Test
+        @DisplayName("Should log both TRANSFER_OUT and TRANSFER_IN transactions")
+        void shouldLogBothTransactions() {
+            
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            accountService.transfer(1L, 2L, new BigDecimal("1000.00"));
+
+            verify(transactionService, times(1)).logTransaction(
+                    eq(1L), eq("TRANSFER_OUT"), any(), any(), eq(2L), anyString());
+            verify(transactionService, times(1)).logTransaction(
+                    eq(2L), eq("TRANSFER_IN"), any(), any(), eq(1L), anyString());
+        }
+
     }
 
     @Nested
