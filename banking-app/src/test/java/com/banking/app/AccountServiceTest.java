@@ -329,6 +329,14 @@ public class AccountServiceTest {
             assertThatThrownBy(() -> accountService.transfer(1L, 99L, new BigDecimal("100")))
                     .isInstanceOf(AccountNotFoundException.class);
         }
+
+        @Test
+        @DisplayName("Should throw exception for zero transfer amount")
+        void shouldThrowExceptionForZeroTransfer() {
+
+            assertThatThrownBy(() -> accountService.transfer(1L, 2L, BigDecimal.ZERO))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
     }
 
     @Nested
