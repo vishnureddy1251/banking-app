@@ -298,6 +298,26 @@ public class AccountServiceTest {
             assertThat(result).contains("Successfully transferred");
             assertThat(testAccount.getBalance()).isEqualByComparingTo(new BigDecimal("4000.00"));
         }
+
+        @Test
+        @DisplayName("Should throw exception when source account has insufficient balance")
+        void shouldThrowExceptionForInsufficientTransferBalance() {
+
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+
+            assertThatThrownBy(() -> accountService.transfer(1L, 2L, new BigDecimal("6000.00")))
+                    .isInstanceOf(InsufficientBalanceException.class);
+        }
+
+        @Test
+        @DisplayName("Should throw exception when source account not found")
+        void shouldThrowExceptionWhenSourceAccountNotFound() {
+
+            when(accountRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> accountService.transfer(99L, 2L, new BigDecimal("100")))
+                    .isInstanceOf(AccountNotFoundException.class);
+        }
     }
 
     @Nested
