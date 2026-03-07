@@ -4,13 +4,22 @@ import com.banking.app.model.User;
 import com.banking.app.repository.UserRepository;
 import com.banking.app.security.JwtUtil;
 import com.banking.app.service.AuthService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AuthService Tests")
@@ -32,4 +41,33 @@ public class AuthServiceTest {
     private AuthService authService;
 
     private User testUser;
+
+    @BeforeEach
+    void setUp() {
+        testUser = new User();
+        testUser.setId(1L);
+        testUser.setUsername("arjun");
+        testUser.setPassword("pass123");
+        testUser.setRole("ROLE_USER");
+    }
+
+    @Nested
+    @DisplayName("Register")
+    class RegisterTests {
+
+        @Test
+        @DisplayName("Should register user successfully")
+        void shouldRegisterUserSuccessfully() {
+
+            when(userRepository.existsByUsername("arjun")).thenReturn(false);
+            when(passwordEncoder.encode("pass123")).thenReturn("$2a$10$hashedPassword");
+            when(userRepository.save(any(User.class))).thenReturn(testUser);
+
+            Map<String, String> result = authService.register(testUser);
+
+            assertThat(result).containsKey("message");
+            assertThat(result.get("message")).isEqualTo("User registered successfully");
+            verify(userRepository, times(1)).save(any(User.class));
+        }
+    }
 }
