@@ -13,9 +13,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -68,6 +70,29 @@ public class AuthServiceTest {
             assertThat(result).containsKey("message");
             assertThat(result.get("message")).isEqualTo("User registered successfully");
             verify(userRepository, times(1)).save(any(User.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("Login")
+    class LoginTests {
+
+        @Test
+        @DisplayName("Should login successfully and return token")
+        void shouldLoginSuccessfully() {
+
+            when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                    .thenReturn(new UsernamePasswordAuthenticationToken("arjun", "pass123"));
+            when(userRepository.findByUsername("arjun")).thenReturn(Optional.of(testUser));
+            when(jwtUtil.generateToken("arjun", "ROLE_USER")).thenReturn("mock-jwt-token-123");
+
+            Map<String, String> result = authService.login("arjun", "pass123");
+
+            assertThat(result).containsKey("token");
+            assertThat(result.get("token")).isEqualTo("mock-jwt-token-123");
+            assertThat(result.get("username")).isEqualTo("arjun");
+            assertThat(result.get("role")).isEqualTo("ROLE_USER");
+            assertThat(result.get("message")).isEqualTo("Login successful");
         }
     }
 }
