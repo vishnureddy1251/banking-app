@@ -283,6 +283,24 @@ public class AccountServiceTest {
     }
 
     @Nested
+    @DisplayName("Transfer")
+    class TransferTests {
+
+        @Test
+        @DisplayName("Should transfer money between accounts successfully")
+        void shouldTransferSuccessfully() {
+
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            String result = accountService.transfer(1L, 2L, new BigDecimal("1000.00"));
+
+            assertThat(result).contains("Successfully transferred");
+            assertThat(testAccount.getBalance()).isEqualByComparingTo(new BigDecimal("4000.00"));
+        }
+    }
+
+    @Nested
     @DisplayName("Delete Account")
     class DeleteAccountTests {
 
