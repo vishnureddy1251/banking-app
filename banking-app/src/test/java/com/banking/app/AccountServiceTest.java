@@ -337,6 +337,14 @@ public class AccountServiceTest {
             assertThatThrownBy(() -> accountService.transfer(1L, 2L, BigDecimal.ZERO))
                     .isInstanceOf(IllegalArgumentException.class);
         }
+
+        @Test
+        @DisplayName("Should throw exception for negative transfer amount")
+        void shouldThrowExceptionForNegativeTransfer() {
+
+            assertThatThrownBy(() -> accountService.transfer(1L, 2L, BigDecimal.ZERO))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
     }
 
     @Nested
