@@ -281,4 +281,31 @@ public class AccountServiceTest {
                     .isInstanceOf(IllegalArgumentException.class);
         }
     }
+
+    @Nested
+    @DisplayName("Delete Account")
+    class DeleteAccountTests {
+
+        @Test
+        @DisplayName("Should delete account successfully")
+        void shouldDeleteAccountSuccessfully() {
+
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            doNothing().when(accountRepository).delete(any(Account.class));
+
+            accountService.deleteAccount(1L);
+
+            verify(accountRepository, times(1)).delete(testAccount);
+        }
+
+        @Test
+        @DisplayName("Should throw exception when deleting non-existent account")
+        void shouldThrowExceptionWhenDeletingNonExistentAccount() {
+
+            when(accountRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> accountService.deleteAccount(99L))
+                    .isInstanceOf(AccountNotFoundException.class);
+        }
+    }
 }
