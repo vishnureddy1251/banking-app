@@ -140,6 +140,20 @@ public class AuthServiceTest {
 
             assertThat(testUser.getRole()).isEqualTo("ROLE_USER");
         }
+
+        @Test
+        @DisplayName("Should keep ROLE_ADMIN when explicitly set")
+        void shouldKeepAdminRoleWhenSet() {
+            
+            testUser.setRole("ROLE_ADMIN");
+            when(userRepository.existsByUsername("arjun")).thenReturn(false);
+            when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$hashed");
+            when(userRepository.save(any(User.class))).thenReturn(testUser);
+
+            authService.register(testUser);
+
+            assertThat(testUser.getRole()).isEqualTo("ROLE_ADMIN");
+        }
     }
 
     @Nested
