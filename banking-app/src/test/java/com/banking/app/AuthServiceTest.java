@@ -98,6 +98,20 @@ public class AuthServiceTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("already taken");
         }
+
+        @Test
+        @DisplayName("Should NOT save user when username is duplicate")
+        void shouldNotSaveUserWhenDuplicate() {
+
+            when(userRepository.existsByUsername("arjun")).thenReturn(true);
+
+            try {
+                authService.register(testUser);
+            } catch (IllegalArgumentException ignored) {
+            }
+
+            verify(userRepository, never()).save(any(User.class));
+        }
     }
 
     @Nested
@@ -149,6 +163,16 @@ public class AuthServiceTest {
                     .hasMessageContaining("Invalid");
         }
 
+        @Test
+        @DisplayName("Should throw BadCredentialsException for non-existent user")
+        void shouldThrowExceptionForNonExistentUser() {
+
+            when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                    .thenThrow(new BadCredentialsException("Bad credentials"));
+
+            assertThatThrownBy(() -> authService.login("nonexistent", "pass123"))
+                    .isInstanceOf(BadCredentialsException.class);
+        }
 
     }
 }
