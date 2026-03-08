@@ -244,6 +244,21 @@ public class AuthServiceTest {
 
             verify(jwtUtil, times(1)).generateToken("arjun", "ROLE_USER");
         }
+        
+        @Test
+        @DisplayName("Should NOT generate token when authentication fails")
+        void shouldNotGenerateTokenOnFailure() {
+        
+            when(authenticationManager.authenticate(any()))
+                    .thenThrow(new BadCredentialsException("Bad credentials"));
+
+            try {
+                authService.login("arjun", "wrongpassword");
+            } catch (BadCredentialsException ignored) {
+            }
+
+            verify(jwtUtil, never()).generateToken(anyString(), anyString());
+        }
 
     }
 }
