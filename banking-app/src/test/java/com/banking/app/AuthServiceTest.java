@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -86,6 +87,17 @@ public class AuthServiceTest {
 
             assertThat(testUser.getPassword()).isEqualTo("$2a$10$hashedPassword");
         }
+
+        @Test
+        @DisplayName("Should throw exception when username already taken")
+        void shouldThrowExceptionForDuplicateUsername() {
+
+            when(userRepository.existsByUsername("arjun")).thenReturn(true);
+
+            assertThatThrownBy(() -> authService.register(testUser))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("already taken");
+        }
     }
 
     @Nested
@@ -124,6 +136,19 @@ public class AuthServiceTest {
             assertThat(result).containsKeys("token", "username", "role", "message");
             assertThat(result).hasSize(4);
         }
+
+        @Test
+        @DisplayName("Should throw BadCredentialsException for wrong password")
+        void shouldThrowExceptionForWrongPassword() {
+
+            when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                    .thenThrow(new BadCredentialsException("Bad credentials"));
+
+            assertThatThrownBy(() -> authService.login("arjun", "wrongpassword"))
+                    .isInstanceOf(BadCredentialsException.class)
+                    .hasMessageContaining("Invalid");
+        }
+
 
     }
 }
