@@ -71,6 +71,21 @@ public class AuthServiceTest {
             assertThat(result.get("message")).isEqualTo("User registered successfully");
             verify(userRepository, times(1)).save(any(User.class));
         }
+
+        @Test
+        @DisplayName("Should hash password before saving")
+        void shouldHashPasswordBeforeSaving() {
+
+            when(userRepository.existsByUsername("arjun")).thenReturn(false);
+            when(passwordEncoder.encode("pass123")).thenReturn("$2a$10$hashedPassword");
+            when(userRepository.save(any(User.class))).thenReturn(testUser);
+
+            authService.register(testUser);
+
+            verify(passwordEncoder, times(1)).encode("pass123");
+
+            assertThat(testUser.getPassword()).isEqualTo("$2a$10$hashedPassword");
+        }
     }
 
     @Nested
@@ -94,5 +109,21 @@ public class AuthServiceTest {
             assertThat(result.get("role")).isEqualTo("ROLE_USER");
             assertThat(result.get("message")).isEqualTo("Login successful");
         }
+
+        @Test
+        @DisplayName("Should return all required fields in login response")
+        void shouldReturnAllFieldsInLoginResponse() {
+
+            when(authenticationManager.authenticate(any())).thenReturn(
+                    new UsernamePasswordAuthenticationToken("arjun", "pass123"));
+            when(userRepository.findByUsername("arjun")).thenReturn(Optional.of(testUser));
+            when(jwtUtil.generateToken(anyString(), anyString())).thenReturn("token123");
+
+            Map<String, String> result = authService.login("arjun", "pass123");
+
+            assertThat(result).containsKeys("token", "username", "role", "message");
+            assertThat(result).hasSize(4);
+        }
+
     }
 }
