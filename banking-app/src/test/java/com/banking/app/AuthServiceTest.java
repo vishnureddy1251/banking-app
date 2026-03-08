@@ -126,6 +126,20 @@ public class AuthServiceTest {
 
             assertThat(testUser.getRole()).isEqualTo("ROLE_USER");
         }
+
+        @Test
+        @DisplayName("Should assign default role ROLE_USER when role is empty")
+        void shouldAssignDefaultRoleWhenEmpty() {
+
+            testUser.setRole("");
+            when(userRepository.existsByUsername("arjun")).thenReturn(false);
+            when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$hashed");
+            when(userRepository.save(any(User.class))).thenReturn(testUser);
+
+            authService.register(testUser);
+
+            assertThat(testUser.getRole()).isEqualTo("ROLE_USER");
+        }
     }
 
     @Nested
@@ -201,6 +215,20 @@ public class AuthServiceTest {
 
             verify(authenticationManager, times(1)).authenticate(
                     any(UsernamePasswordAuthenticationToken.class));
+        }
+
+        @Test
+        @DisplayName("Should generate JWT token with correct username and role")
+        void shouldGenerateTokenWithCorrectParams() {
+
+            when(authenticationManager.authenticate(any())).thenReturn(
+                    new UsernamePasswordAuthenticationToken("arjun", "pass123"));
+            when(userRepository.findByUsername("arjun")).thenReturn(Optional.of(testUser));
+            when(jwtUtil.generateToken("arjun", "ROLE_USER")).thenReturn("token");
+
+            authService.login("arjun", "pass123");
+
+            verify(jwtUtil, times(1)).generateToken("arjun", "ROLE_USER");
         }
 
     }
