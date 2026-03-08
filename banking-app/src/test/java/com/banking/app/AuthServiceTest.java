@@ -112,6 +112,20 @@ public class AuthServiceTest {
 
             verify(userRepository, never()).save(any(User.class));
         }
+
+        @Test
+        @DisplayName("Should assign default role ROLE_USER when role is null")
+        void shouldAssignDefaultRoleWhenNull() {
+
+            testUser.setRole(null);
+            when(userRepository.existsByUsername("arjun")).thenReturn(false);
+            when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$hashed");
+            when(userRepository.save(any(User.class))).thenReturn(testUser);
+
+            authService.register(testUser);
+
+            assertThat(testUser.getRole()).isEqualTo("ROLE_USER");
+        }
     }
 
     @Nested
@@ -172,6 +186,21 @@ public class AuthServiceTest {
 
             assertThatThrownBy(() -> authService.login("nonexistent", "pass123"))
                     .isInstanceOf(BadCredentialsException.class);
+        }
+
+        @Test
+        @DisplayName("Should call authenticationManager.authenticate during login")
+        void shouldCallAuthenticationManager() {
+
+            when(authenticationManager.authenticate(any())).thenReturn(
+                    new UsernamePasswordAuthenticationToken("arjun", "pass123"));
+            when(userRepository.findByUsername("arjun")).thenReturn(Optional.of(testUser));
+            when(jwtUtil.generateToken(anyString(), anyString())).thenReturn("token");
+
+            authService.login("arjun", "pass123");
+
+            verify(authenticationManager, times(1)).authenticate(
+                    any(UsernamePasswordAuthenticationToken.class));
         }
 
     }
