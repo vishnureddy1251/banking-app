@@ -53,6 +53,24 @@ public class TimeoutService {
         });
     }
 
+    @TimeLimiter(name = "loanTimeout", fallbackMethod = "loanTimeoutFallback")
+    public CompletableFuture<Map<String, Object>> checkCreditWithTimeout(Long loanId) {
+
+        return CompletableFuture.supplyAsync(() -> {
+            log.info("Running credit check for loan {} (timeout: 10s)", loanId);
+
+            simulateExternalCall(7000);
+
+            return Map.of(
+                    "status", "APPROVED",
+                    "loanId", loanId,
+                    "creditScore", 750,
+                    "message", "Credit check completed within timeout",
+                    "timestamp", LocalDateTime.now().toString()
+            );
+        });
+    }
+
     private void simulateExternalCall(int delayMs) {
         try {
             Thread.sleep(delayMs);
