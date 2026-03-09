@@ -89,6 +89,18 @@ public class TimeoutService {
         });
     }
 
+        public CompletableFuture<Map<String, Object>> paymentTimeoutFallback(
+            Long accountId, BigDecimal amount, Throwable throwable) {
+        log.warn("PAYMENT TIMEOUT for account {}! Reason: {}", accountId, throwable.getMessage());
+        return CompletableFuture.completedFuture(Map.of(
+                "status", "TIMEOUT",
+                "message", "Payment timed out after 3 seconds. Please try again.",
+                "fallback", "TIMEOUT",
+                "accountId", accountId,
+                "timestamp", LocalDateTime.now().toString()
+        ));
+    }
+
     private void simulateExternalCall(int delayMs) {
         try {
             Thread.sleep(delayMs);
