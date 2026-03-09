@@ -101,6 +101,43 @@ public class TimeoutService {
         ));
     }
 
+    public CompletableFuture<Map<String, Object>> paymentTimeoutFallback(
+            Long accountId, BigDecimal amount, int delayMs, Throwable throwable) {
+        log.warn("SLOW PAYMENT TIMEOUT! Delay: {}ms exceeded 3s limit", delayMs);
+        return CompletableFuture.completedFuture(Map.of(
+                "status", "TIMEOUT",
+                "message", "Payment timed out after 3 seconds (simulated " + delayMs + "ms delay)",
+                "fallback", "TIMEOUT",
+                "accountId", accountId,
+                "timestamp", LocalDateTime.now().toString()
+        ));
+    }
+
+    public CompletableFuture<Map<String, Object>> transferTimeoutFallback(
+            Long fromAccount, Long toAccount, BigDecimal amount, Throwable throwable) {
+        log.warn("TRANSFER TIMEOUT from {} to {}! Reason: {}", fromAccount, toAccount, throwable.getMessage());
+        return CompletableFuture.completedFuture(Map.of(
+                "status", "TIMEOUT",
+                "message", "Transfer timed out after 5 seconds. Transaction queued.",
+                "fallback", "TIMEOUT",
+                "from", fromAccount,
+                "to", toAccount,
+                "timestamp", LocalDateTime.now().toString()
+        ));
+    }
+
+    public CompletableFuture<Map<String, Object>> loanTimeoutFallback(
+            Long loanId, Throwable throwable) {
+        log.warn("CREDIT CHECK TIMEOUT for loan {}! Reason: {}", loanId, throwable.getMessage());
+        return CompletableFuture.completedFuture(Map.of(
+                "status", "TIMEOUT",
+                "message", "Credit check timed out after 10 seconds. Queued for manual review.",
+                "fallback", "TIMEOUT",
+                "loanId", loanId,
+                "timestamp", LocalDateTime.now().toString()
+        ));
+    }
+
     private void simulateExternalCall(int delayMs) {
         try {
             Thread.sleep(delayMs);
