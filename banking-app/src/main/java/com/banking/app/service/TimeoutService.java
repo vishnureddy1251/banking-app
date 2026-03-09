@@ -114,6 +114,18 @@ public class TimeoutService {
         ));
     }
 
+       public CompletableFuture<Map<String, Object>> loanTimeoutFallback(
+            Long loanId, Throwable throwable) {
+        log.warn("CREDIT CHECK TIMEOUT for loan {}! Reason: {}", loanId, throwable.getMessage());
+        return CompletableFuture.completedFuture(Map.of(
+                "status", "TIMEOUT",
+                "message", "Credit check timed out after 10 seconds. Queued for manual review.",
+                "fallback", "TIMEOUT",
+                "loanId", loanId,
+                "timestamp", LocalDateTime.now().toString()
+        ));
+    }
+
     private void simulateExternalCall(int delayMs) {
         try {
             Thread.sleep(delayMs);
