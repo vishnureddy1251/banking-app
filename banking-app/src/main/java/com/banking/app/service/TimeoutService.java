@@ -101,6 +101,19 @@ public class TimeoutService {
         ));
     }
 
+     public CompletableFuture<Map<String, Object>> transferTimeoutFallback(
+            Long fromAccount, Long toAccount, BigDecimal amount, Throwable throwable) {
+        log.warn("TRANSFER TIMEOUT from {} to {}! Reason: {}", fromAccount, toAccount, throwable.getMessage());
+        return CompletableFuture.completedFuture(Map.of(
+                "status", "TIMEOUT",
+                "message", "Transfer timed out after 5 seconds. Transaction queued.",
+                "fallback", "TIMEOUT",
+                "from", fromAccount,
+                "to", toAccount,
+                "timestamp", LocalDateTime.now().toString()
+        ));
+    }
+
     private void simulateExternalCall(int delayMs) {
         try {
             Thread.sleep(delayMs);
