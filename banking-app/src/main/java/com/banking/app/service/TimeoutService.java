@@ -71,6 +71,24 @@ public class TimeoutService {
         });
     }
 
+    @TimeLimiter(name = "paymentTimeout", fallbackMethod = "paymentTimeoutFallback")
+    public CompletableFuture<Map<String, Object>> simulateSlowPayment(
+            Long accountId, BigDecimal amount, int delayMs) {
+
+        return CompletableFuture.supplyAsync(() -> {
+            log.info("Simulating slow payment ({}ms delay, 3s timeout)", delayMs);
+
+            simulateExternalCall(delayMs);
+
+            return Map.of(
+                    "status", "SUCCESS",
+                    "message", "Payment completed in " + delayMs + "ms",
+                    "accountId", accountId,
+                    "timestamp", LocalDateTime.now().toString()
+            );
+        });
+    }
+
     private void simulateExternalCall(int delayMs) {
         try {
             Thread.sleep(delayMs);
