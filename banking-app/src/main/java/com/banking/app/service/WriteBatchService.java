@@ -4,10 +4,14 @@ import com.banking.app.model.Transaction;
 import com.banking.app.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -40,5 +44,25 @@ public class WriteBatchService {
 
         log.debug("Transaction queued for account {}. Queue size: {}",
                 accountId, transactionQueue.size());
+    }
+
+    @Scheduled(fixedRate = 5000)
+    @Transactional
+    public void flushTransactions() {
+        if (transactionQueue.isEmpty()) return;
+
+        List<Transaction> batch = new ArrayList<>();
+        Transaction transaction;
+
+        while ((transaction = transactionQueue.poll()) != null) {
+            batch.add(transaction);
+        }
+
+        if (!batch.isEmpty()) {
+            transactionRepository.saveAll(batch);
+            totalFlushed.addAndGet(batch.size());
+            log.info("BATCH FLUSH: Saved {} transactions in one batch. Total flushed: {}",
+                    batch.size(), totalFlushed.get());
+        }
     }
 }
