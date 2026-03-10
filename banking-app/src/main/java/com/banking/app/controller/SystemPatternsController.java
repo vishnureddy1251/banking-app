@@ -51,4 +51,13 @@ public class SystemPatternsController {
                 "stats", writeBatchService.getStats()
         ));
     }
+
+    @PostMapping("/batch/flush")
+    public ResponseEntity<Map<String, Object>> forceFlush() {
+        int flushed = writeBatchService.forceFlush();
+        return ResponseEntity.ok(Map.of(
+                "message", flushed + " transactions flushed to database",
+                "stats", writeBatchService.getStats()
+        ));
+    }
 }
