@@ -4,10 +4,7 @@ import com.banking.app.service.TimeoutService;
 import com.banking.app.service.WriteBatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -59,5 +56,10 @@ public class SystemPatternsController {
                 "message", flushed + " transactions flushed to database",
                 "stats", writeBatchService.getStats()
         ));
+    }
+
+    @GetMapping("/batch/stats")
+    public ResponseEntity<Map<String, Object>> getBatchStats() {
+        return ResponseEntity.ok(writeBatchService.getStats());
     }
 }
