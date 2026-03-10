@@ -65,4 +65,19 @@ public class WriteBatchService {
                     batch.size(), totalFlushed.get());
         }
     }
+
+    @Transactional
+    public int forceFlush() {
+        List<Transaction> batch = new ArrayList<>();
+        Transaction transaction;
+        while ((transaction = transactionQueue.poll()) != null) {
+            batch.add(transaction);
+        }
+        if (!batch.isEmpty()) {
+            transactionRepository.saveAll(batch);
+            totalFlushed.addAndGet(batch.size());
+            log.info("FORCE FLUSH: Saved {} transactions", batch.size());
+        }
+        return batch.size();
+    }
 }
