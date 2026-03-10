@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -79,5 +80,16 @@ public class WriteBatchService {
             log.info("FORCE FLUSH: Saved {} transactions", batch.size());
         }
         return batch.size();
+    }
+
+    public Map<String, Object> getStats() {
+        return Map.of(
+                "queueSize", transactionQueue.size(),
+                "totalQueued", totalBatched.get(),
+                "totalFlushed", totalFlushed.get(),
+                "pending", totalBatched.get() - totalFlushed.get(),
+                "batchSize", 20,
+                "flushIntervalSeconds", 5
+        );
     }
 }
