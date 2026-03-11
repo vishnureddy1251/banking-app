@@ -17,7 +17,7 @@ public class Notification {
     private Long id;
 
     @Column(name = "account_id", nullable = false)
-    private Long accountId;
+    private Long account_id;
 
     @Column(name = "channel", nullable = false)
     private String channel;
