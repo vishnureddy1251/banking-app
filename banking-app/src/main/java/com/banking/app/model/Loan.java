@@ -21,7 +21,7 @@ public class Loan {
     private Long id;
 
     @Column(name = "account_id", nullable = false)
-    private Long accountId;
+    private Long account_id;
 
     @Column(name = "loan_type", nullable = false)
     @NotBlank(message = "Loan type is required (PERSONAL, HOME, AUTO, EDUCATION)")
