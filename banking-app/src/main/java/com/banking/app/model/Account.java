@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.List;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -34,6 +39,21 @@ public class Account {
     @Column(name = "balance", nullable = false)
     @DecimalMin(value = "0.0", message = "Balance cannot be negative")
     private BigDecimal balance;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id", insertable = false, updatable = false)
+    @JsonIgnore
+    private List<Transaction> transactions;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id", insertable = false, updatable = false)
+    @JsonIgnore
+    private List<Loan> loans;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id", insertable = false, updatable = false)
+    @JsonIgnore
+    private List<Notification> notifications;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
