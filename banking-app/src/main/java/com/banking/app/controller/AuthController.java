@@ -4,6 +4,7 @@ import com.banking.app.model.User;
 import com.banking.app.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
@@ -22,6 +24,7 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> register(@Valid @RequestBody User user) {
         try {
             Map<String, String> response = authService.register(user);
+            log.info("REST: Registration request for username {}", user.getUsername());
             return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -34,6 +37,7 @@ public class AuthController {
             String username = request.get("username");
             String password = request.get("password");
             Map<String, String> response = authService.login(username, password);
+            log.info("REST: Login request for username {}", username);
             return ResponseEntity.ok(response);
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
