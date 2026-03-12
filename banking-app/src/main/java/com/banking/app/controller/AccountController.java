@@ -4,6 +4,7 @@ import com.banking.app.model.Account;
 import com.banking.app.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/accounts")
@@ -22,6 +24,7 @@ public class AccountController {
     @PostMapping
     public ResponseEntity<Account> createAccount(@Valid @RequestBody Account account){
         Account created = accountService.createAccount(account);
+        log.info("REST: Create account request received for {}", account.getAccountName());
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
