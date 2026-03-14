@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -51,5 +52,20 @@ public class RedisCacheService {
     public long getTtl(String key) {
         Long ttl = redisTemplate.getExpire(key, TimeUnit.SECONDS);
         return ttl != null ? ttl : -1;
+    }
+
+    public long deleteByPattern(String pattern) {
+        Set<String> keys = redisTemplate.keys(pattern);
+        if (keys != null && !keys.isEmpty()) {
+            Long count = redisTemplate.delete(keys);
+            log.info("Redis DELETE PATTERN: {} → {} keys deleted", pattern, count);
+            return count != null ? count : 0;
+        }
+        return 0;
+    }
+
+    public Set<String> getKeys(String pattern) {
+        Set<String> keys = redisTemplate.keys(pattern);
+        return keys != null ? keys : Set.of();
     }
 }
