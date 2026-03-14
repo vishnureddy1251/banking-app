@@ -68,4 +68,17 @@ public class RedisCacheService {
         Set<String> keys = redisTemplate.keys(pattern);
         return keys != null ? keys : Set.of();
     }
+
+    public void cacheAccountBalance(Long accountId, Object balance) {
+        set("balance:" + accountId, balance, 5);
+    }
+
+    public Object getCachedBalance(Long accountId) {
+        return get("balance:" + accountId);
+    }
+
+    public void cacheExchangeRate(String fromCurrency, String toCurrency, Object rate) {
+        String key = "rate:" + fromCurrency + ":" + toCurrency;
+        set(key, rate, 1); // 1 minute TTL
+    }
 }
