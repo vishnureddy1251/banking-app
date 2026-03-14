@@ -22,4 +22,14 @@ public class RedisCacheService {
         redisTemplate.opsForValue().set(key, value);
         log.info("Redis SET: {} (no TTL)", key);
     }
+
+    public Object get(String key) {
+        Object value = redisTemplate.opsForValue().get(key);
+        if (value != null) {
+            log.info("Redis HIT: {}", key);
+        } else {
+            log.info("Redis MISS: {}", key);
+        }
+        return value;
+    }
 }
