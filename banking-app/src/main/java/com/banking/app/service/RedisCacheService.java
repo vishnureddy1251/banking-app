@@ -79,6 +79,36 @@ public class RedisCacheService {
 
     public void cacheExchangeRate(String fromCurrency, String toCurrency, Object rate) {
         String key = "rate:" + fromCurrency + ":" + toCurrency;
-        set(key, rate, 1); // 1 minute TTL
+        set(key, rate, 1);
+    }
+
+    public void storeOtp(String username, String otp) {
+        set("otp:" + username, otp, 5);
+    }
+
+    // Verify OTP
+    public boolean verifyOtp(String username, String otp) {
+        Object stored = get("otp:" + username);
+        if (stored != null && stored.toString().equals(otp)) {
+            delete("otp:" + username); // One-time use
+            return true;
+        }
+        return false;
+    }
+
+    public int incrementFailedAttempts(String username) {
+        String key = "failed:" + username;
+        Long count = redisTemplate.opsForValue().increment(key);
+        redisTemplate.expire(key, Duration.ofMinutes(15)); // Reset after 15 min
+        return count != null ? count.intValue() : 0;
+    }
+
+    public boolean isAccountLocked(String username) {
+        Object attempts = get("failed:" + username);
+        return attempts != null && Integer.parseInt(attempts.toString()) >= 5;
+    }
+
+    public void resetFailedAttempts(String username) {
+        delete("failed:" + username);
     }
 }
