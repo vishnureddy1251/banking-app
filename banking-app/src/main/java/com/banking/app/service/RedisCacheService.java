@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -31,5 +32,24 @@ public class RedisCacheService {
             log.info("Redis MISS: {}", key);
         }
         return value;
+    }
+
+    public boolean delete(String key) {
+        Boolean deleted = redisTemplate.delete(key);
+        log.info("Redis DELETE: {} (result: {})", key, deleted);
+        return Boolean.TRUE.equals(deleted);
+    }
+
+    public boolean exists(String key) {
+        return Boolean.TRUE.equals(redisTemplate.hasKey(key));
+    }
+
+    public boolean setExpiry(String key, long ttlMinutes) {
+        return Boolean.TRUE.equals(redisTemplate.expire(key, Duration.ofMinutes(ttlMinutes)));
+    }
+
+    public long getTtl(String key) {
+        Long ttl = redisTemplate.getExpire(key, TimeUnit.SECONDS);
+        return ttl != null ? ttl : -1;
     }
 }
