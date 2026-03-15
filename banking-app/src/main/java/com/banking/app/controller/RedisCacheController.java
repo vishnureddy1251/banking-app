@@ -3,10 +3,7 @@ package com.banking.app.controller;
 import com.banking.app.service.RedisCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -30,5 +27,26 @@ public class RedisCacheController {
                 "key", key,
                 "ttlMinutes", String.valueOf(ttl)
         ));
+    }
+
+    @GetMapping("/get/{key}")
+    public ResponseEntity<Map<String, Object>> getValue(@PathVariable String key) {
+        Object value = redisCacheService.get(key);
+        long ttl = redisCacheService.getTtl(key);
+
+        if (value != null) {
+            return ResponseEntity.ok(Map.of(
+                    "key", key,
+                    "value", value,
+                    "ttlSeconds", ttl,
+                    "status", "HIT"
+            ));
+        } else {
+            return ResponseEntity.ok(Map.of(
+                    "key", key,
+                    "status", "MISS",
+                    "message", "Key not found in Redis"
+            ));
+        }
     }
 }
