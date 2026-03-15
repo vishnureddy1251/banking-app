@@ -69,4 +69,18 @@ public class RedisCacheController {
                 "keys", keys
         ));
     }
+
+    @DeleteMapping("/flush/{pattern}")
+    public ResponseEntity<Map<String, Object>> flushByPattern(@PathVariable String pattern) {
+        long deleted = redisCacheService.deleteByPattern(pattern + "*");
+        return ResponseEntity.ok(Map.of(
+                "pattern", pattern + "*",
+                "deletedCount", deleted
+        ));
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<Map<String, Object>> getInfo() {
+        return ResponseEntity.ok(redisCacheService.getRedisInfo());
+    }
 }
