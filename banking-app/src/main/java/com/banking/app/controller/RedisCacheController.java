@@ -83,4 +83,19 @@ public class RedisCacheController {
     public ResponseEntity<Map<String, Object>> getInfo() {
         return ResponseEntity.ok(redisCacheService.getRedisInfo());
     }
+
+    @PostMapping("/otp/generate")
+    public ResponseEntity<Map<String, String>> generateOtp(@RequestBody Map<String, String> request) {
+        String username = request.get("username");
+        String otp = String.valueOf((int) (Math.random() * 900000) + 100000); // 6-digit OTP
+
+        redisCacheService.storeOtp(username, otp);
+
+        return ResponseEntity.ok(Map.of(
+                "username", username,
+                "otp", otp,
+                "message", "OTP stored in Redis. Expires in 5 minutes.",
+                "note", "In production, this would be sent via SMS/email, not returned in response"
+        ));
+    }
 }
