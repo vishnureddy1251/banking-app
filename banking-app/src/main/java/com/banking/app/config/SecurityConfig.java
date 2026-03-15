@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers("/graphql/**").permitAll()
                         .requestMatchers("/graphiql/**").permitAll()
                         .requestMatchers("/api/v1/system/**").permitAll()
+                        .requestMatchers("/api/v1/redis/**").permitAll()
 
                         .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html").permitAll()
 
