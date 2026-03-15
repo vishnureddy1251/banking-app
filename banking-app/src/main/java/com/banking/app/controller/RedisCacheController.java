@@ -98,4 +98,18 @@ public class RedisCacheController {
                 "note", "In production, this would be sent via SMS/email, not returned in response"
         ));
     }
+
+    @PostMapping("/otp/verify")
+    public ResponseEntity<Map<String, Object>> verifyOtp(@RequestBody Map<String, String> request) {
+        String username = request.get("username");
+        String otp = request.get("otp");
+
+        boolean valid = redisCacheService.verifyOtp(username, otp);
+
+        return ResponseEntity.ok(Map.of(
+                "username", username,
+                "valid", valid,
+                "message", valid ? "OTP verified successfully" : "Invalid or expired OTP"
+        ));
+    }
 }
