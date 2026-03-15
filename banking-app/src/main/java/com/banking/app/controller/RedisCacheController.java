@@ -112,4 +112,21 @@ public class RedisCacheController {
                 "message", valid ? "OTP verified successfully" : "Invalid or expired OTP"
         ));
     }
+
+    @PostMapping("/login-attempt/fail")
+    public ResponseEntity<Map<String, Object>> simulateFailedLogin(
+            @RequestBody Map<String, String> request) {
+        String username = request.get("username");
+        int attempts = redisCacheService.incrementFailedAttempts(username);
+        boolean locked = redisCacheService.isAccountLocked(username);
+
+        return ResponseEntity.ok(Map.of(
+                "username", username,
+                "failedAttempts", attempts,
+                "locked", locked,
+                "message", locked ?
+                        "Account locked after 5 failed attempts. Try again in 15 minutes." :
+                        "Failed attempt " + attempts + " of 5"
+        ));
+    }
 }
