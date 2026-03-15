@@ -129,4 +129,15 @@ public class RedisCacheController {
                         "Failed attempt " + attempts + " of 5"
         ));
     }
+
+    @PostMapping("/login-attempt/reset")
+    public ResponseEntity<Map<String, String>> resetFailedAttempts(
+            @RequestBody Map<String, String> request) {
+        String username = request.get("username");
+        redisCacheService.resetFailedAttempts(username);
+        return ResponseEntity.ok(Map.of(
+                "username", username,
+                "message", "Failed login attempts reset"
+        ));
+    }
 }
