@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -86,7 +88,6 @@ public class RedisCacheService {
         set("otp:" + username, otp, 5);
     }
 
-    // Verify OTP
     public boolean verifyOtp(String username, String otp) {
         Object stored = get("otp:" + username);
         if (stored != null && stored.toString().equals(otp)) {
@@ -110,5 +111,22 @@ public class RedisCacheService {
 
     public void resetFailedAttempts(String username) {
         delete("failed:" + username);
+    }
+
+    public Map<String, Object> getRedisInfo() {
+        Map<String, Object> info = new LinkedHashMap<>();
+        try {
+            info.put("totalAccountKeys", getKeys("account:*").size());
+            info.put("totalBalanceKeys", getKeys("balance:*").size());
+            info.put("totalOtpKeys", getKeys("otp:*").size());
+            info.put("totalRateKeys", getKeys("rate:*").size());
+            info.put("totalFailedLoginKeys", getKeys("failed:*").size());
+            info.put("allKeys", getKeys("*").size());
+            info.put("status", "CONNECTED");
+        } catch (Exception e) {
+            info.put("status", "DISCONNECTED");
+            info.put("error", e.getMessage());
+        }
+        return info;
     }
 }
