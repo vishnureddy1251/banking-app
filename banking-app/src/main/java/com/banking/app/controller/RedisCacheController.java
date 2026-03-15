@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/redis")
@@ -48,5 +49,24 @@ public class RedisCacheController {
                     "message", "Key not found in Redis"
             ));
         }
+    }
+
+    @DeleteMapping("/delete/{key}")
+    public ResponseEntity<Map<String, Object>> deleteKey(@PathVariable String key) {
+        boolean deleted = redisCacheService.delete(key);
+        return ResponseEntity.ok(Map.of(
+                "key", key,
+                "deleted", deleted
+        ));
+    }
+
+    @GetMapping("/keys/{pattern}")
+    public ResponseEntity<Map<String, Object>> getKeys(@PathVariable String pattern) {
+        Set<String> keys = redisCacheService.getKeys(pattern + "*");
+        return ResponseEntity.ok(Map.of(
+                "pattern", pattern + "*",
+                "count", keys.size(),
+                "keys", keys
+        ));
     }
 }
