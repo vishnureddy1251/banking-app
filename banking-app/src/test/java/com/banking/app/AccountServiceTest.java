@@ -38,6 +38,7 @@ public class AccountServiceTest {
     private AccountService accountService;
 
     private Account testAccount;
+    private Account testAccount2;
 
     @BeforeEach
     void setUp() {
@@ -47,6 +48,13 @@ public class AccountServiceTest {
         testAccount.setAccountNumber("ACC12345678");
         testAccount.setAccountType("SAVINGS");
         testAccount.setBalance(new BigDecimal("5000.00"));
+
+        testAccount2 = new Account();
+        testAccount2.setId(2L);
+        testAccount2.setAccountName("Second User");
+        testAccount2.setAccountNumber("ACC87654321");
+        testAccount2.setAccountType("SAVINGS");
+        testAccount2.setBalance(new BigDecimal("2500.00"));
     }
 
     @Nested
@@ -144,7 +152,7 @@ public class AccountServiceTest {
         @DisplayName("Should return all accounts")
         void shouldReturnAllAccounts() {
 
-            when(accountRepository.findAll()).thenReturn(Arrays.asList(testAccount));
+            when(accountRepository.findAll()).thenReturn(Arrays.asList(testAccount, testAccount2));
 
             List<Account> result = accountService.getAllAccounts();
 
@@ -291,12 +299,14 @@ public class AccountServiceTest {
         void shouldTransferSuccessfully() {
 
             when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            when(accountRepository.findById(2L)).thenReturn(Optional.of(testAccount2));
             when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             String result = accountService.transfer(1L, 2L, new BigDecimal("1000.00"));
 
             assertThat(result).contains("Successfully transferred");
             assertThat(testAccount.getBalance()).isEqualByComparingTo(new BigDecimal("4000.00"));
+            assertThat(testAccount2.getBalance()).isEqualByComparingTo(new BigDecimal("3500.00"));
         }
 
         @Test
@@ -304,6 +314,7 @@ public class AccountServiceTest {
         void shouldThrowExceptionForInsufficientTransferBalance() {
 
             when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            when(accountRepository.findById(2L)).thenReturn(Optional.of(testAccount2));
 
             assertThatThrownBy(() -> accountService.transfer(1L, 2L, new BigDecimal("6000.00")))
                     .isInstanceOf(InsufficientBalanceException.class);
@@ -351,6 +362,7 @@ public class AccountServiceTest {
         void shouldLogBothTransactions() {
             
             when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            when(accountRepository.findById(2L)).thenReturn(Optional.of(testAccount2));
             when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             accountService.transfer(1L, 2L, new BigDecimal("1000.00"));
@@ -366,6 +378,7 @@ public class AccountServiceTest {
         void shouldSaveBothAccounts() {
 
             when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            when(accountRepository.findById(2L)).thenReturn(Optional.of(testAccount2));
             when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             accountService.transfer(1L, 2L, new BigDecimal("1000.00"));
