@@ -306,5 +306,6 @@ banking-app/
 3. Commit changes (`git commit -m "Add new feature"`)
 4. Push to branch (`git push origin feature/new-feature`)
 5. Open a Pull Request
+6. 
 
 ---
