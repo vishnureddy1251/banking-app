@@ -44,5 +44,23 @@ public class RedisConfig {
                 .serializeValuesWith(RedisSerializationContext.SerializationPair
                         .fromSerializer(new GenericJackson2JsonRedisSerializer()))
                 .disableCachingNullValues();
+
+        RedisCacheConfiguration accountCacheConfig = defaultConfig
+                .entryTtl(Duration.ofMinutes(5));
+
+        RedisCacheConfiguration customerCacheConfig = defaultConfig
+                .entryTtl(Duration.ofMinutes(10));
+
+        RedisCacheConfiguration shortLivedConfig = defaultConfig
+                .entryTtl(Duration.ofMinutes(1));
+
+        return RedisCacheManager.builder(connectionFactory)
+                .cacheDefaults(defaultConfig)
+                .withCacheConfiguration("accounts", accountCacheConfig)
+                .withCacheConfiguration("allAccounts", accountCacheConfig)
+                .withCacheConfiguration("customers", customerCacheConfig)
+                .withCacheConfiguration("allCustomers", customerCacheConfig)
+                .withCacheConfiguration("exchangeRates", shortLivedConfig)
+                .build();
     }
 }
