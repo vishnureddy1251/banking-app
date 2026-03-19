@@ -2,9 +2,9 @@ name: Banking App CI
 
 on:
   push:
-    branches: [ master]
+    branches: [ master ]
   pull_request:
-    branches: [ master]
+    branches: [ master ]
 
 jobs:
   build:
@@ -20,7 +20,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Build with Maven
-        run: mvn clean package -DskipTests
+        run: cd banking-app && mvn clean package -DskipTests
 
       - name: Run Tests
-        run: mvn test
+        run: cd banking-app && mvn test
