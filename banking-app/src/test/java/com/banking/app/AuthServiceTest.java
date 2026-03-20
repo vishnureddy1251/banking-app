@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Map;
@@ -256,6 +257,21 @@ public class AuthServiceTest {
                 authService.login("arjun", "wrongpassword");
             } catch (BadCredentialsException ignored) {
             }
+
+            verify(jwtUtil, never()).generateToken(anyString(), anyString());
+        }
+
+        @Test
+        @DisplayName("Should throw generic bad credentials when authenticated user is missing in repository")
+        void shouldThrowBadCredentialsWhenUserMissingAfterAuthentication() {
+
+            Authentication auth = new UsernamePasswordAuthenticationToken("ghost", "pass123");
+            when(authenticationManager.authenticate(any())).thenReturn(auth);
+            when(userRepository.findByUsername("ghost")).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> authService.login("ghost", "pass123"))
+                    .isInstanceOf(BadCredentialsException.class)
+                    .hasMessage("Invalid username or password");
 
             verify(jwtUtil, never()).generateToken(anyString(), anyString());
         }

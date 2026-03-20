@@ -232,6 +232,36 @@ public class AccountServiceTest {
                     eq(1L), eq("DEPOSIT"), eq(new BigDecimal("1000")),
                     eq(new BigDecimal("6000.00")), isNull(), eq("Cash deposit"));
         }
+
+        @Test
+        @DisplayName("Should send deposit notification and not send low balance when balance stays high")
+        void shouldSendDepositNotificationWithoutLowBalanceForHighBalance() {
+
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            accountService.deposit(1L, new BigDecimal("1000"));
+
+            verify(wsNotificationService, times(1))
+                    .notifyDeposit(1L, new BigDecimal("1000"), new BigDecimal("6000.00"));
+            verify(wsNotificationService, never()).notifyLowBalance(anyLong(), any(BigDecimal.class));
+        }
+
+        @Test
+        @DisplayName("Should send low balance alert after deposit when resulting balance is below threshold")
+        void shouldSendLowBalanceAlertAfterDepositWhenBelowThreshold() {
+
+            testAccount.setBalance(new BigDecimal("100.00"));
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            accountService.deposit(1L, new BigDecimal("50.00"));
+
+            verify(wsNotificationService, times(1))
+                    .notifyDeposit(1L, new BigDecimal("50.00"), new BigDecimal("150.00"));
+            verify(wsNotificationService, times(1))
+                    .notifyLowBalance(1L, new BigDecimal("150.00"));
+        }
     }
 
     @Nested
@@ -287,6 +317,22 @@ public class AccountServiceTest {
 
             assertThatThrownBy(() -> accountService.withdraw(1L, new BigDecimal("-100")))
                     .isInstanceOf(IllegalArgumentException.class);
+        }
+
+        @Test
+        @DisplayName("Should send withdrawal and low balance notifications when threshold is crossed")
+        void shouldSendWithdrawalAndLowBalanceNotifications() {
+
+            testAccount.setBalance(new BigDecimal("550.00"));
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            accountService.withdraw(1L, new BigDecimal("100.00"));
+
+            verify(wsNotificationService, times(1))
+                    .notifyWithdrawal(1L, new BigDecimal("100.00"), new BigDecimal("450.00"));
+            verify(wsNotificationService, times(1))
+                    .notifyLowBalance(1L, new BigDecimal("450.00"));
         }
     }
 
@@ -384,6 +430,25 @@ public class AccountServiceTest {
             accountService.transfer(1L, 2L, new BigDecimal("1000.00"));
 
             verify(accountRepository, times(2)).save(any(Account.class));
+        }
+
+        @Test
+        @DisplayName("Should send transfer notifications and low balance for source when needed")
+        void shouldSendTransferNotificationsAndLowBalanceForSource() {
+
+            testAccount.setBalance(new BigDecimal("600.00"));
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            when(accountRepository.findById(2L)).thenReturn(Optional.of(testAccount2));
+            when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            accountService.transfer(1L, 2L, new BigDecimal("200.00"));
+
+            verify(wsNotificationService, times(1))
+                    .notifyTransferSent(1L, 2L, new BigDecimal("200.00"), new BigDecimal("400.00"));
+            verify(wsNotificationService, times(1))
+                    .notifyTransferReceived(2L, 1L, new BigDecimal("200.00"), new BigDecimal("2700.00"));
+            verify(wsNotificationService, times(1))
+                    .notifyLowBalance(1L, new BigDecimal("400.00"));
         }
 
     }
