@@ -198,6 +198,10 @@ public class AccountServiceTest {
             assertThatThrownBy(() -> accountService.deposit(1L, BigDecimal.ZERO))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("positive");
+
+            verify(accountRepository, never()).findById(anyLong());
+            verify(transactionService, never()).logTransaction(anyLong(), anyString(), any(), any(), any(), anyString());
+            verify(wsNotificationService, never()).notifyDeposit(anyLong(), any(BigDecimal.class), any(BigDecimal.class));
         }
 
         @Test
@@ -217,6 +221,11 @@ public class AccountServiceTest {
 
             assertThatThrownBy(() -> accountService.deposit(99L, new BigDecimal("1000")))
                     .isInstanceOf(AccountNotFoundException.class);
+
+            verify(accountRepository, never()).save(any(Account.class));
+            verify(transactionService, never()).logTransaction(anyLong(), anyString(), any(), any(), any(), anyString());
+            verify(wsNotificationService, never()).notifyDeposit(anyLong(), any(BigDecimal.class), any(BigDecimal.class));
+            verify(wsNotificationService, never()).notifyLowBalance(anyLong(), any(BigDecimal.class));
         }
 
         @Test
@@ -262,6 +271,21 @@ public class AccountServiceTest {
             verify(wsNotificationService, times(1))
                     .notifyLowBalance(1L, new BigDecimal("150.00"));
         }
+
+        @Test
+        @DisplayName("Should NOT send low balance when deposit results in exactly threshold")
+        void shouldNotSendLowBalanceAfterDepositWhenExactlyThreshold() {
+
+            testAccount.setBalance(new BigDecimal("400.00"));
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            accountService.deposit(1L, new BigDecimal("100.00"));
+
+            verify(wsNotificationService, times(1))
+                    .notifyDeposit(1L, new BigDecimal("100.00"), new BigDecimal("500.00"));
+            verify(wsNotificationService, never()).notifyLowBalance(anyLong(), any(BigDecimal.class));
+        }
     }
 
     @Nested
@@ -289,6 +313,10 @@ public class AccountServiceTest {
             assertThatThrownBy(() -> accountService.withdraw(1L, new BigDecimal("6000.00")))
                     .isInstanceOf(InsufficientBalanceException.class)
                     .hasMessageContaining("Insufficient");
+
+            verify(transactionService, never()).logTransaction(anyLong(), anyString(), any(), any(), any(), anyString());
+            verify(wsNotificationService, never()).notifyWithdrawal(anyLong(), any(BigDecimal.class), any(BigDecimal.class));
+            verify(wsNotificationService, never()).notifyLowBalance(anyLong(), any(BigDecimal.class));
         }
 
         @Test
@@ -309,6 +337,12 @@ public class AccountServiceTest {
 
             assertThatThrownBy(() -> accountService.withdraw(1L, BigDecimal.ZERO))
                     .isInstanceOf(IllegalArgumentException.class);
+
+            verify(accountRepository, never()).findById(anyLong());
+            verify(accountRepository, never()).save(any(Account.class));
+            verify(transactionService, never()).logTransaction(anyLong(), anyString(), any(), any(), any(), anyString());
+            verify(wsNotificationService, never()).notifyWithdrawal(anyLong(), any(BigDecimal.class), any(BigDecimal.class));
+            verify(wsNotificationService, never()).notifyLowBalance(anyLong(), any(BigDecimal.class));
         }
 
         @Test
@@ -317,6 +351,28 @@ public class AccountServiceTest {
 
             assertThatThrownBy(() -> accountService.withdraw(1L, new BigDecimal("-100")))
                     .isInstanceOf(IllegalArgumentException.class);
+
+            verify(accountRepository, never()).findById(anyLong());
+            verify(accountRepository, never()).save(any(Account.class));
+            verify(transactionService, never()).logTransaction(anyLong(), anyString(), any(), any(), any(), anyString());
+            verify(wsNotificationService, never()).notifyWithdrawal(anyLong(), any(BigDecimal.class), any(BigDecimal.class));
+            verify(wsNotificationService, never()).notifyLowBalance(anyLong(), any(BigDecimal.class));
+        }
+
+        @Test
+        @DisplayName("Should throw exception when account not found for withdraw")
+        void shouldThrowExceptionWhenAccountNotFoundForWithdraw() {
+
+            when(accountRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> accountService.withdraw(99L, new BigDecimal("100.00")))
+                    .isInstanceOf(AccountNotFoundException.class);
+
+            verify(accountRepository, times(1)).findById(99L);
+            verify(accountRepository, never()).save(any(Account.class));
+            verify(transactionService, never()).logTransaction(anyLong(), anyString(), any(), any(), any(), anyString());
+            verify(wsNotificationService, never()).notifyWithdrawal(anyLong(), any(BigDecimal.class), any(BigDecimal.class));
+            verify(wsNotificationService, never()).notifyLowBalance(anyLong(), any(BigDecimal.class));
         }
 
         @Test
@@ -333,6 +389,21 @@ public class AccountServiceTest {
                     .notifyWithdrawal(1L, new BigDecimal("100.00"), new BigDecimal("450.00"));
             verify(wsNotificationService, times(1))
                     .notifyLowBalance(1L, new BigDecimal("450.00"));
+        }
+
+        @Test
+        @DisplayName("Should NOT send low balance when withdrawal results in exactly threshold")
+        void shouldNotSendLowBalanceAfterWithdrawalWhenExactlyThreshold() {
+
+            testAccount.setBalance(new BigDecimal("600.00"));
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            accountService.withdraw(1L, new BigDecimal("100.00"));
+
+            verify(wsNotificationService, times(1))
+                    .notifyWithdrawal(1L, new BigDecimal("100.00"), new BigDecimal("500.00"));
+            verify(wsNotificationService, never()).notifyLowBalance(anyLong(), any(BigDecimal.class));
         }
     }
 
@@ -364,6 +435,12 @@ public class AccountServiceTest {
 
             assertThatThrownBy(() -> accountService.transfer(1L, 2L, new BigDecimal("6000.00")))
                     .isInstanceOf(InsufficientBalanceException.class);
+
+            verify(accountRepository, never()).save(any(Account.class));
+            verify(transactionService, never()).logTransaction(anyLong(), anyString(), any(), any(), any(), anyString());
+            verify(wsNotificationService, never()).notifyTransferSent(anyLong(), anyLong(), any(BigDecimal.class), any(BigDecimal.class));
+            verify(wsNotificationService, never()).notifyTransferReceived(anyLong(), anyLong(), any(BigDecimal.class), any(BigDecimal.class));
+            verify(wsNotificationService, never()).notifyLowBalance(anyLong(), any(BigDecimal.class));
         }
 
         @Test
@@ -374,6 +451,13 @@ public class AccountServiceTest {
 
             assertThatThrownBy(() -> accountService.transfer(99L, 2L, new BigDecimal("100")))
                     .isInstanceOf(AccountNotFoundException.class);
+
+            verify(accountRepository, never()).findById(eq(2L));
+            verify(accountRepository, never()).save(any(Account.class));
+            verify(transactionService, never()).logTransaction(anyLong(), anyString(), any(), any(), any(), anyString());
+            verify(wsNotificationService, never()).notifyTransferSent(anyLong(), anyLong(), any(BigDecimal.class), any(BigDecimal.class));
+            verify(wsNotificationService, never()).notifyTransferReceived(anyLong(), anyLong(), any(BigDecimal.class), any(BigDecimal.class));
+            verify(wsNotificationService, never()).notifyLowBalance(anyLong(), any(BigDecimal.class));
         }
 
         @Test
@@ -385,6 +469,12 @@ public class AccountServiceTest {
 
             assertThatThrownBy(() -> accountService.transfer(1L, 99L, new BigDecimal("100")))
                     .isInstanceOf(AccountNotFoundException.class);
+
+            verify(accountRepository, never()).save(any(Account.class));
+            verify(transactionService, never()).logTransaction(anyLong(), anyString(), any(), any(), any(), anyString());
+            verify(wsNotificationService, never()).notifyTransferSent(anyLong(), anyLong(), any(BigDecimal.class), any(BigDecimal.class));
+            verify(wsNotificationService, never()).notifyTransferReceived(anyLong(), anyLong(), any(BigDecimal.class), any(BigDecimal.class));
+            verify(wsNotificationService, never()).notifyLowBalance(anyLong(), any(BigDecimal.class));
         }
 
         @Test
@@ -393,6 +483,13 @@ public class AccountServiceTest {
 
             assertThatThrownBy(() -> accountService.transfer(1L, 2L, BigDecimal.ZERO))
                     .isInstanceOf(IllegalArgumentException.class);
+
+            verify(accountRepository, never()).findById(anyLong());
+            verify(accountRepository, never()).save(any(Account.class));
+            verify(transactionService, never()).logTransaction(anyLong(), anyString(), any(), any(), any(), anyString());
+            verify(wsNotificationService, never()).notifyTransferSent(anyLong(), anyLong(), any(BigDecimal.class), any(BigDecimal.class));
+            verify(wsNotificationService, never()).notifyTransferReceived(anyLong(), anyLong(), any(BigDecimal.class), any(BigDecimal.class));
+            verify(wsNotificationService, never()).notifyLowBalance(anyLong(), any(BigDecimal.class));
         }
 
         @Test
@@ -401,6 +498,13 @@ public class AccountServiceTest {
 
             assertThatThrownBy(() -> accountService.transfer(1L, 2L, new BigDecimal("-500")))
                     .isInstanceOf(IllegalArgumentException.class);
+
+            verify(accountRepository, never()).findById(anyLong());
+            verify(accountRepository, never()).save(any(Account.class));
+            verify(transactionService, never()).logTransaction(anyLong(), anyString(), any(), any(), any(), anyString());
+            verify(wsNotificationService, never()).notifyTransferSent(anyLong(), anyLong(), any(BigDecimal.class), any(BigDecimal.class));
+            verify(wsNotificationService, never()).notifyTransferReceived(anyLong(), anyLong(), any(BigDecimal.class), any(BigDecimal.class));
+            verify(wsNotificationService, never()).notifyLowBalance(anyLong(), any(BigDecimal.class));
         }
         
         @Test
@@ -449,6 +553,24 @@ public class AccountServiceTest {
                     .notifyTransferReceived(2L, 1L, new BigDecimal("200.00"), new BigDecimal("2700.00"));
             verify(wsNotificationService, times(1))
                     .notifyLowBalance(1L, new BigDecimal("400.00"));
+        }
+
+        @Test
+        @DisplayName("Should NOT send low balance on transfer when source ends exactly at threshold")
+        void shouldNotSendLowBalanceOnTransferWhenSourceEndsExactlyThreshold() {
+
+            testAccount.setBalance(new BigDecimal("700.00"));
+            when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+            when(accountRepository.findById(2L)).thenReturn(Optional.of(testAccount2));
+            when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            accountService.transfer(1L, 2L, new BigDecimal("200.00"));
+
+            verify(wsNotificationService, times(1))
+                    .notifyTransferSent(1L, 2L, new BigDecimal("200.00"), new BigDecimal("500.00"));
+            verify(wsNotificationService, times(1))
+                    .notifyTransferReceived(2L, 1L, new BigDecimal("200.00"), new BigDecimal("2700.00"));
+            verify(wsNotificationService, never()).notifyLowBalance(anyLong(), any(BigDecimal.class));
         }
 
     }
