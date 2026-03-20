@@ -13,12 +13,11 @@ import java.util.List;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "accounts")
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString(exclude = {"transactions", "loans", "notifications"})
 public class Account {
 
     @Id
