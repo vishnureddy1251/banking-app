@@ -21,6 +21,7 @@ public class SystemPatternsController {
     private final TimeoutService timeoutService;
     private final WriteBatchService writeBatchService;
 
+    @Operation(summary = "Test payment with 3s timeout")
     @PostMapping("/timeout/payment")
     public CompletableFuture<Map<String, Object>> testPaymentTimeout(
             @RequestBody Map<String, Object> request) {
@@ -29,6 +30,7 @@ public class SystemPatternsController {
         return timeoutService.processPaymentWithTimeout(accountId, amount);
     }
 
+    @Operation(summary = "Queue transactions for batch writing")
     @PostMapping("/batch/queue")
     public ResponseEntity<Map<String, Object>> queueTransactions(
             @RequestBody Map<String, Object> request) {
@@ -52,6 +54,7 @@ public class SystemPatternsController {
         ));
     }
 
+    @Operation(summary = "Force flush queued transactions")
     @PostMapping("/batch/flush")
     public ResponseEntity<Map<String, Object>> forceFlush() {
         int flushed = writeBatchService.forceFlush();
@@ -61,6 +64,7 @@ public class SystemPatternsController {
         ));
     }
 
+    @Operation(summary = "View batch processing stats")
     @GetMapping("/batch/stats")
     public ResponseEntity<Map<String, Object>> getBatchStats() {
         return ResponseEntity.ok(writeBatchService.getStats());

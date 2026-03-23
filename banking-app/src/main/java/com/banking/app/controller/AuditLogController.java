@@ -20,26 +20,31 @@ public class AuditLogController {
 
     private final AuditLogService auditLogService;
 
+    @Operation(summary = "Get recent 50 audit logs")
     @GetMapping
     public ResponseEntity<List<AuditLog>> getRecentLogs() {
         return ResponseEntity.ok(auditLogService.getRecentLogs());
     }
 
+    @Operation(summary = "Get logs by username")
     @GetMapping("/user/{username}")
     public ResponseEntity<List<AuditLog>> getLogsByUser(@PathVariable String username) {
         return ResponseEntity.ok(auditLogService.getLogsByUser(username));
     }
 
+    @Operation(summary = "Get logs by action type")
     @GetMapping("/action/{action}")
     public ResponseEntity<List<AuditLog>> getLogsByAction(@PathVariable String action) {
         return ResponseEntity.ok(auditLogService.getLogsByAction(action.toUpperCase()));
     }
 
+    @Operation(summary = "Get logs by entity type")
     @GetMapping("/entity/{entityType}")
     public ResponseEntity<List<AuditLog>> getLogsByEntity(@PathVariable String entityType) {
         return ResponseEntity.ok(auditLogService.getLogsByEntity(entityType.toUpperCase()));
     }
 
+    @Operation(summary = "Get logs by date range")
     @GetMapping("/date")
     public ResponseEntity<List<AuditLog>> getLogsByDate(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,

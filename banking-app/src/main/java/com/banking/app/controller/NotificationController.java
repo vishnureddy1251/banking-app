@@ -19,26 +19,31 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
+    @Operation(summary = "Get all notifications")
     @GetMapping("/{accountId}")
     public ResponseEntity<List<Notification>> getNotifications(@PathVariable Long accountId) {
         return ResponseEntity.ok(notificationService.getNotifications(accountId));
     }
 
+    @Operation(summary = "Get unread notifications")
     @GetMapping("/{accountId}/unread")
     public ResponseEntity<List<Notification>> getUnread(@PathVariable Long accountId) {
         return ResponseEntity.ok(notificationService.getUnreadNotifications(accountId));
     }
 
+    @Operation(summary = "Get unread count")
     @GetMapping("/{accountId}/count")
     public ResponseEntity<Map<String, Long>> getUnreadCount(@PathVariable Long accountId) {
         return ResponseEntity.ok(notificationService.getUnreadCount(accountId));
     }
 
+    @Operation(summary = "Mark one as read")
     @PutMapping("/{id}/read")
     public ResponseEntity<Notification> markAsRead(@PathVariable Long id) {
         return ResponseEntity.ok(notificationService.markAsRead(id));
     }
 
+    @Operation(summary = "Mark all as read")
     @PutMapping("/{accountId}/read-all")
     public ResponseEntity<Map<String, String>> markAllAsRead(@PathVariable Long accountId) {
         notificationService.markAllAsRead(accountId);

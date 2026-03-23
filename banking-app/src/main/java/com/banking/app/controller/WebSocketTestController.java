@@ -18,6 +18,7 @@ public class WebSocketTestController {
 
     private final WebSocketNotificationService wsService;
 
+    @Operation(summary = "Send deposit notification via WebSocket")
     @PostMapping("/deposit")
     public ResponseEntity<Map<String, String>> testDeposit(@RequestBody Map<String, Object> request) {
         Long accountId = Long.valueOf(request.get("accountId").toString());
@@ -27,6 +28,7 @@ public class WebSocketTestController {
         return ResponseEntity.ok(Map.of("message", "Deposit notification sent to account " + accountId));
     }
 
+    @Operation(summary = "Send transfer notification via WebSocket")
     @PostMapping("/transfer")
     public ResponseEntity<Map<String, String>> testTransfer(@RequestBody Map<String, Object> request) {
         Long fromId = Long.valueOf(request.get("fromAccountId").toString());
@@ -38,6 +40,7 @@ public class WebSocketTestController {
         return ResponseEntity.ok(Map.of("message", "Transfer notifications sent"));
     }
 
+    @Operation(summary = "Send loan approved notification")
     @PostMapping("/loan-approved")
     public ResponseEntity<Map<String, String>> testLoanApproved(@RequestBody Map<String, Object> request) {
         Long accountId = Long.valueOf(request.get("accountId").toString());
@@ -48,6 +51,7 @@ public class WebSocketTestController {
         return ResponseEntity.ok(Map.of("message", "Loan approved notification sent"));
     }
 
+    @Operation(summary = "Send low balance alert")
     @PostMapping("/low-balance")
     public ResponseEntity<Map<String, String>> testLowBalance(@RequestBody Map<String, Object> request) {
         Long accountId = Long.valueOf(request.get("accountId").toString());
@@ -57,6 +61,7 @@ public class WebSocketTestController {
         return ResponseEntity.ok(Map.of("message", "Low balance alert sent to account " + accountId));
     }
 
+    @Operation(summary = "Broadcast system message to all users")
     @PostMapping("/broadcast")
     public ResponseEntity<Map<String, String>> testBroadcast(@RequestBody Map<String, Object> request) {
         String title = request.get("title").toString();

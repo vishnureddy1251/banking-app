@@ -26,6 +26,7 @@ public class ResilienceController {
     private final RetryRegistry retryRegistry;
     private final BulkheadRegistry bulkheadRegistry;
 
+    @Operation(summary = "Test payment with Retry + Bulkhead + CB")
     @PostMapping("/payment")
     public ResponseEntity<Map<String, Object>> testPayment(@RequestBody Map<String, Object> request) {
         Long accountId = Long.valueOf(request.get("accountId").toString());
@@ -37,6 +38,7 @@ public class ResilienceController {
         return ResponseEntity.ok(result);
     }
 
+    @Operation(summary = "Test transfer with all 3 patterns")
     @PostMapping("/transfer")
     public ResponseEntity<Map<String, Object>> testTransfer(@RequestBody Map<String, Object> request) {
         Long fromAccount = Long.valueOf(request.get("fromAccountId").toString());
@@ -48,12 +50,14 @@ public class ResilienceController {
         return ResponseEntity.ok(result);
     }
 
-        @PostMapping("/loan/{loanId}")
+    @Operation(summary = "Test loan with Bulkhead + CB")
+    @PostMapping("/loan/{loanId}")
     public ResponseEntity<Map<String, Object>> testLoan(@PathVariable Long loanId) {
         Map<String, Object> result = resilienceService.processLoanWithResilience(loanId);
         return ResponseEntity.ok(result);
     }
 
+    @Operation(summary = "View all resilience stats")
     @GetMapping("/status")
     public ResponseEntity<Map<String, Object>> getStatus() {
         Map<String, Object> status = new HashMap<>();

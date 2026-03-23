@@ -21,6 +21,7 @@ public class EventSourcingController {
 
     private final EventSourcingService eventSourcingService;
 
+    @Operation(summary = "Publish a new event")
     @PostMapping("/publish")
     public ResponseEntity<AccountEvent> publishEvent(@RequestBody Map<String, Object> request) {
         Long accountId = Long.valueOf(request.get("accountId").toString());
@@ -36,22 +37,26 @@ public class EventSourcingController {
         return ResponseEntity.ok(event);
     }
 
+    @Operation(summary = "Get full event history")
     @GetMapping("/history/{accountId}")
     public ResponseEntity<List<AccountEvent>> getEventHistory(@PathVariable Long accountId) {
         return ResponseEntity.ok(eventSourcingService.getEventHistory(accountId));
     }
 
+    @Operation(summary = "Rebuild state from events")
     @GetMapping("/account/{accountId}/rebuild")
     public ResponseEntity<Map<String, Object>> rebuildState(@PathVariable Long accountId) {
         return ResponseEntity.ok(eventSourcingService.rebuildAccountState(accountId));
     }
 
+    @Operation(summary = "Get state at specific point (time travel)")
     @GetMapping("/account/{accountId}/at/{sequenceNumber}")
     public ResponseEntity<Map<String, Object>> getStateAtEvent(
             @PathVariable Long accountId, @PathVariable Long sequenceNumber) {
         return ResponseEntity.ok(eventSourcingService.getStateAtEvent(accountId, sequenceNumber));
     }
 
+    @Operation(summary = "Get events by type")
     @GetMapping("/account/{accountId}/type/{eventType}")
     public ResponseEntity<List<AccountEvent>> getEventsByType(
             @PathVariable Long accountId, @PathVariable String eventType) {

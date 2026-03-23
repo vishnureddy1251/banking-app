@@ -18,6 +18,7 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
+    @Operation(summary = "Get transactions for an account (optional: filter by type)")
     @GetMapping("/{accountId}")
     public ResponseEntity<List<Transaction>> getTransaction(
             @PathVariable Long accountId,

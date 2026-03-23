@@ -18,6 +18,7 @@ public class RedisCacheController {
 
     private final RedisCacheService redisCacheService;
 
+    @Operation(summary = "Store a value in Redis")
     @PostMapping("/set")
     public ResponseEntity<Map<String, String>> setValue(@RequestBody Map<String, Object> request) {
         String key = request.get("key").toString();
@@ -33,6 +34,7 @@ public class RedisCacheController {
         ));
     }
 
+    @Operation(summary = "Get a value from Redis")
     @GetMapping("/get/{key}")
     public ResponseEntity<Map<String, Object>> getValue(@PathVariable String key) {
         Object value = redisCacheService.get(key);
@@ -54,6 +56,7 @@ public class RedisCacheController {
         }
     }
 
+    @Operation(summary = "Delete a key from Redis")
     @DeleteMapping("/delete/{key}")
     public ResponseEntity<Map<String, Object>> deleteKey(@PathVariable String key) {
         boolean deleted = redisCacheService.delete(key);
@@ -63,6 +66,7 @@ public class RedisCacheController {
         ));
     }
 
+    @Operation(summary = "List keys by pattern")
     @GetMapping("/keys/{pattern}")
     public ResponseEntity<Map<String, Object>> getKeys(@PathVariable String pattern) {
         Set<String> keys = redisCacheService.getKeys(pattern + "*");
@@ -73,6 +77,7 @@ public class RedisCacheController {
         ));
     }
 
+    @Operation(summary = "Delete keys by pattern")
     @DeleteMapping("/flush/{pattern}")
     public ResponseEntity<Map<String, Object>> flushByPattern(@PathVariable String pattern) {
         long deleted = redisCacheService.deleteByPattern(pattern + "*");
@@ -82,11 +87,13 @@ public class RedisCacheController {
         ));
     }
 
+    @Operation(summary = "View Redis info and stats")
     @GetMapping("/info")
     public ResponseEntity<Map<String, Object>> getInfo() {
         return ResponseEntity.ok(redisCacheService.getRedisInfo());
     }
 
+    @Operation(summary = "Generate OTP for a user")
     @PostMapping("/otp/generate")
     public ResponseEntity<Map<String, String>> generateOtp(@RequestBody Map<String, String> request) {
         String username = request.get("username");
@@ -102,6 +109,7 @@ public class RedisCacheController {
         ));
     }
 
+    @Operation(summary = "Verify OTP")
     @PostMapping("/otp/verify")
     public ResponseEntity<Map<String, Object>> verifyOtp(@RequestBody Map<String, String> request) {
         String username = request.get("username");
@@ -116,6 +124,7 @@ public class RedisCacheController {
         ));
     }
 
+    @Operation(summary = "Simulate failed login attempt")
     @PostMapping("/login-attempt/fail")
     public ResponseEntity<Map<String, Object>> simulateFailedLogin(
             @RequestBody Map<String, String> request) {
@@ -133,6 +142,7 @@ public class RedisCacheController {
         ));
     }
 
+    @Operation(summary = "Reset failed login attempts")
     @PostMapping("/login-attempt/reset")
     public ResponseEntity<Map<String, String>> resetFailedAttempts(
             @RequestBody Map<String, String> request) {

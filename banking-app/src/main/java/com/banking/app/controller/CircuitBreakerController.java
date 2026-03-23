@@ -23,6 +23,7 @@ public class CircuitBreakerController {
     private final PaymentGatewayService paymentGatewayService;
     private final CircuitBreakerRegistry circuitBreakerRegistry;
 
+    @Operation(summary = "Test payment with circuit breaker")
     @PostMapping("/payment")
     public ResponseEntity<Map<String, Object>> testPayment(@RequestBody Map<String, Object> request) {
         Long accountId = Long.valueOf(request.get("accountId").toString());
@@ -33,12 +34,14 @@ public class CircuitBreakerController {
         return ResponseEntity.ok(result);
     }
 
+    @Operation(summary = "Test loan approval with circuit breaker")
     @PostMapping("/loan/{loanId}")
     public ResponseEntity<Map<String, Object>> testLoanApproval(@PathVariable Long loanId) {
         Map<String, Object> result = circuitBreakerService.processLoanApproval(loanId);
         return ResponseEntity.ok(result);
     }
 
+    @Operation(summary = "Test transfer with circuit breaker")
     @PostMapping("/transfer")
     public ResponseEntity<Map<String, Object>> testTransfer(@RequestBody Map<String, Object> request) {
         Long fromAccount = Long.valueOf(request.get("fromAccountId").toString());
@@ -50,6 +53,7 @@ public class CircuitBreakerController {
         return ResponseEntity.ok(result);
     }
 
+    @Operation(summary = "Simulate gateway DOWN")
     @PostMapping("/gateway/down")
     public ResponseEntity<Map<String, String>> gatewayDown() {
         paymentGatewayService.enableFailureMode();
@@ -59,6 +63,7 @@ public class CircuitBreakerController {
         ));
     }
 
+    @Operation(summary = "Simulate gateway UP")
     @PostMapping("/gateway/up")
     public ResponseEntity<Map<String, String>> gatewayUp() {
         paymentGatewayService.disableFailureMode();
@@ -68,6 +73,7 @@ public class CircuitBreakerController {
         ));
     }
 
+    @Operation(summary = "Check gateway status")
     @GetMapping("/gateway/status")
     public ResponseEntity<Map<String, Object>> gatewayStatus() {
         return ResponseEntity.ok(Map.of(
@@ -76,6 +82,7 @@ public class CircuitBreakerController {
         ));
     }
 
+    @Operation(summary = "View all circuit breaker states")
     @GetMapping("/status")
     public ResponseEntity<Map<String, Object>> circuitBreakerStatus() {
         Map<String, Object> statuses = new HashMap<>();

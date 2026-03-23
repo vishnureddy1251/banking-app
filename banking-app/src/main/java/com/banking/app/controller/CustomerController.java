@@ -21,32 +21,38 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
+    @Operation(summary = "Create a customer")
     @PostMapping
     public ResponseEntity<Customer> createCustomer(@Valid @RequestBody Customer customer){
         Customer created = customerService.createCustomer(customer);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Get all customers")
     @GetMapping
     public ResponseEntity<List<Customer>> getAllCustomers() {
         return ResponseEntity.ok(customerService.getAllCustomers());
     }
 
+    @Operation(summary = "Get customer by ID")
     @GetMapping("/{id}")
     public ResponseEntity<Customer> getCustomer(@PathVariable Long id) {
         return ResponseEntity.ok(customerService.getCustomerById(id));
     }
 
+    @Operation(summary = "Search customers by name")
     @GetMapping("/search")
     public ResponseEntity<List<Customer>> searchCustomers(@RequestParam String name) {
         return ResponseEntity.ok(customerService.searchCustomers(name));
     }
 
+    @Operation(summary = "Update customer")
     @PutMapping("/{id}")
     public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
         return ResponseEntity.ok(customerService.updateCustomer(id, customer));
     }
 
+    @Operation(summary = "Delete customer")
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteCustomer(@PathVariable Long id) {
         customerService.deleteCustomer(id);
