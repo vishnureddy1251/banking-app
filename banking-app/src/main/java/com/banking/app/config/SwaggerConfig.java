@@ -32,7 +32,7 @@ public class SwaggerConfig {
                                 
                                 **Roles:**
                                 - `ROLE_USER` → Can view accounts, deposit, withdraw, transfer, pay bills
-                                - `ROLE_ADMIN` → Everything above, accounts, approve/reject loans, view audit logs
+                                - `ROLE_ADMIN` → Everything above + delete accounts, approve/reject loans, view audit logs
                                 
                                 **Features:** JWT Auth • Rate Limiting (20 req/min) • Circuit Breaker • Event Sourcing • GraphQL • WebSocket • Caching
                                 """)
