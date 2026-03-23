@@ -24,6 +24,7 @@ public class AccountController {
 
     private final AccountService accountService;
 
+    @Operation(summary = "Create a new account")
     @PostMapping
     public ResponseEntity<Account> createAccount(@Valid @RequestBody Account account){
         Account created = accountService.createAccount(account);
@@ -31,18 +32,21 @@ public class AccountController {
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Get account by ID")
     @GetMapping("/{id}")
     public ResponseEntity<Account> getAccount(@PathVariable Long id) {
         Account account = accountService.getAccountById(id);
         return ResponseEntity.ok(account);
     }
 
+    @Operation(summary = "Get all accounts")
     @GetMapping
     public ResponseEntity<List<Account>> getAllAccounts() {
         List<Account> accounts = accountService.getAllAccounts();
         return ResponseEntity.ok(accounts);
     }
 
+    @Operation(summary = "Deposit money")
     @PutMapping("/{id}/deposit")
     public ResponseEntity<Account> deposit(
             @PathVariable Long id,
@@ -53,6 +57,7 @@ public class AccountController {
         return ResponseEntity.ok(updated);
     }
 
+    @Operation(summary = "Withdraw money")
     @PutMapping("/{id}/withdraw")
     public ResponseEntity<Account> withdraw(
             @PathVariable Long id,
@@ -63,6 +68,7 @@ public class AccountController {
         return ResponseEntity.ok(updated);
     }
 
+    @Operation(summary = "Transfer money between accounts")
     @PostMapping("/transfer")
     public ResponseEntity<Map<String, String>> transfer(
             @RequestBody Map<String, Object> request) {
@@ -75,6 +81,7 @@ public class AccountController {
         return ResponseEntity.ok(Map.of("message", result));
     }
 
+    @Operation(summary = "Delete account (ADMIN only)")
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteAccount(@PathVariable Long id) {
         accountService.deleteAccount(id);

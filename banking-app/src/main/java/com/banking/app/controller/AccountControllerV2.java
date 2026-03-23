@@ -26,6 +26,7 @@ public class AccountControllerV2 {
     private final AccountService accountService;
     private final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US);
 
+    @Operation(summary = "Get all accounts with formatted balance")
     @GetMapping
     public ResponseEntity<List<AccountResponseV2>> getAllAccounts() {
         List<Account> accounts = accountService.getAllAccounts();

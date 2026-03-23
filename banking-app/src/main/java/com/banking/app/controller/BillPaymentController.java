@@ -19,11 +19,13 @@ public class BillPaymentController {
 
     private final BillPaymentService billPaymentService;
 
+    @Operation(summary = "Pay a bill")
     @PostMapping("/pay")
     public ResponseEntity<BillPayment> payBill(@Valid @RequestBody BillPayment bill) {
         return new ResponseEntity<>(billPaymentService.payBill(bill), HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Get bills for an account")
     @GetMapping("/account/{accountId}")
     public ResponseEntity<List<BillPayment>> getPayments(
             @PathVariable Long accountId,
@@ -35,6 +37,7 @@ public class BillPaymentController {
         return ResponseEntity.ok(billPaymentService.getPaymentsByAccountId(accountId));
     }
 
+    @Operation(summary = "Track payment by reference number")
     @GetMapping("/track/{referenceNumber}")
     public ResponseEntity<BillPayment> trackPayment(@PathVariable String referenceNumber) {
         return ResponseEntity.ok(billPaymentService.getPaymentByReference(referenceNumber));

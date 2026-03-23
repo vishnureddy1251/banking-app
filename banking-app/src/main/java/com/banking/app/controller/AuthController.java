@@ -23,6 +23,7 @@ public class AuthController {
 
     private final AuthService authService;
 
+    @Operation(summary = "Register new user")
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> register(@Valid @RequestBody User user) {
         try {
@@ -34,6 +35,7 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "Login and get JWT token")
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> request) {
         try {

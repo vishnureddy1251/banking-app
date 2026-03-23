@@ -14,6 +14,7 @@ import java.util.Map;
 @RequestMapping("/api/v1/rate-limit")
 public class RateLimitController {
 
+    @Operation(summary = "View rate limit policy (20 req/min)")
     @GetMapping("/info")
     public ResponseEntity<Map<String, Object>> getRateLimitInfo() {
         return ResponseEntity.ok(Map.of(
