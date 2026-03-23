@@ -5,6 +5,8 @@ import com.banking.app.service.WriteBatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -12,6 +14,7 @@ import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "15. ⏱️ System Patterns", description = "Test timeouts and write batching")
 @RequestMapping("/api/v1/system")
 public class SystemPatternsController {
 

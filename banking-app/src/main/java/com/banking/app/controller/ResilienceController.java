@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 import com.banking.app.service.ResilienceService;
 import io.github.resilience4j.bulkhead.BulkheadRegistry;
@@ -14,8 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/v1/resilience")
 @RequiredArgsConstructor
+@Tag(name = "10. 🛡️ Resilience", description = "Test retry + bulkhead + circuit breaker combined")
+@RequestMapping("api/v1/resilience")
 public class ResilienceController {
 
     private final ResilienceService resilienceService;

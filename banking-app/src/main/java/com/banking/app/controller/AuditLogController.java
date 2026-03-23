@@ -6,13 +6,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/audit")
 @RequiredArgsConstructor
+@Tag(name = "13. 📊 Audit Logs", description = "View API activity logs (ADMIN only)")
+@RequestMapping("/api/v1/audit")
 public class AuditLogController {
 
     private final AuditLogService auditLogService;

@@ -8,15 +8,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
 @RestController
-@RequestMapping("/api/v1/loans")
+@Slf4j
 @RequiredArgsConstructor
+@Tag(name = "6. 🏦 Loans", description = "Apply, approve, reject, and repay loans")
+@RequestMapping("/api/v1/loans")
 public class LoanController {
 
     private final LoanService loanService;

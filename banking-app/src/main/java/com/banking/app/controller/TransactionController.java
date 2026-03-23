@@ -5,11 +5,14 @@ import com.banking.app.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "4. 📜 Transactions", description = "View transaction history for any account")
 @RequestMapping("/api/v1/transactions")
 public class TransactionController {
 

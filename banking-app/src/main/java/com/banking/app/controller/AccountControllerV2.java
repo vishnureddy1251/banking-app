@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -16,8 +18,9 @@ import java.util.Locale;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v2/accounts")
 @RequiredArgsConstructor
+@Tag(name = "3. 💰 Accounts V2", description = "Enhanced endpoints with formatted balances and validation")
+@RequestMapping("/api/v2/accounts")
 public class AccountControllerV2 {
 
     private final AccountService accountService;

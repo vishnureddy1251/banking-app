@@ -5,12 +5,15 @@ import com.banking.app.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "8. 🔔 Notifications", description = "View and manage notifications")
 @RequestMapping("/api/v1/notification")
 public class NotificationController {
 

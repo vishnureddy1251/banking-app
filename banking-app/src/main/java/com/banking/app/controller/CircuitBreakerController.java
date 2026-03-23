@@ -6,14 +6,17 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/circuit-breaker")
 @RequiredArgsConstructor
+@Tag(name = "9. ⚡ Circuit Breaker", description = "Test circuit breaker with simulated failures")
+@RequestMapping("/api/v1/circuit-breaker")
 public class CircuitBreakerController {
 
     private final CircuitBreakerService circuitBreakerService;

@@ -9,12 +9,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 import java.util.Map;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "1. 🔐 Authentication", description = "Register and login to get JWT token. START HERE!")
 @RequestMapping("/api/auth")
 public class AuthController {
 

@@ -4,13 +4,16 @@ import com.banking.app.service.RedisCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 import java.util.Map;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/api/v1/redis")
 @RequiredArgsConstructor
+@Tag(name = "12. 🗄️ Cache", description = "View cache stats and clear caches")
+@RequestMapping("/api/v1/redis")
 public class RedisCacheController {
 
     private final RedisCacheService redisCacheService;

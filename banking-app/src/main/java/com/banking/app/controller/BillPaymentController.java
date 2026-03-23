@@ -6,11 +6,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "7. 💡 Bill Payments", description = "Pay bills and track payments")
 @RequestMapping("/api/v1/bills")
 public class BillPaymentController {
 

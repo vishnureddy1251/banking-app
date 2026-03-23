@@ -6,15 +6,17 @@ import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import com.banking.app.model.AccountEvent;
 import com.banking.app.service.EventSourcingService;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/events")
 @RequiredArgsConstructor
+@Tag(name = "11. 📦 Event Sourcing", description = "Publish events, view history, rebuild state, time travel")
+@RequestMapping("/api/v1/events")
 public class EventSourcingController {
 
     private final EventSourcingService eventSourcingService;

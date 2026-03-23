@@ -4,13 +4,16 @@ import com.banking.app.service.WebSocketNotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 import java.math.BigDecimal;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/ws-test")
 @RequiredArgsConstructor
+@Tag(name = "16. 🔌 WebSocket Test", description = "Trigger real-time WebSocket notifications")
+@RequestMapping("/api/v1/ws-test")
 public class WebSocketTestController {
 
     private final WebSocketNotificationService wsService;
